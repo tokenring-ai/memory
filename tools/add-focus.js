@@ -9,18 +9,19 @@ import { z } from "zod";
  */
 export default execute;
 export async function execute({ item }, registry) {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+	const chatService = registry.requireFirstServiceByType(ChatService);
+	const memoryService = registry.requireFirstServiceByType(MemoryService);
 
-  const type = "Focus on these items";
-  memoryService.pushAttentionItem(type, item);
-  memoryService.spliceAttentionItems(type, -10);
+	const type = "Focus on these items";
+	memoryService.pushAttentionItem(type, item);
+	memoryService.spliceAttentionItems(type, -10);
 
-   chatService.infoLine((`Added to focus`));
-  return `Added to focus`;
+	chatService.infoLine(`Added to focus`);
+	return `Added to focus`;
 }
 
-export const description = "Add an item to focus on (max 5). The item will be presented in future chats to keep the focus on the current topic.";
+export const description =
+	"Add an item to focus on (max 5). The item will be presented in future chats to keep the focus on the current topic.";
 export const parameters = z.object({
-  item: z.string().describe("The item to add to the focus list.")
+	item: z.string().describe("The item to add to the focus list."),
 });

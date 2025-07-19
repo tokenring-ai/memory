@@ -9,20 +9,20 @@ import { z } from "zod";
  */
 export default execute;
 export async function execute({ item }, registry) {
- const chatService = registry.requireFirstServiceByType(ChatService);
- const memoryService = registry.requireFirstServiceByType(MemoryService);
+	const chatService = registry.requireFirstServiceByType(ChatService);
+	const memoryService = registry.requireFirstServiceByType(MemoryService);
 
+	const type = "These are the goals that have been set";
+	memoryService.pushAttentionItem(type, item);
+	memoryService.spliceAttentionItems(type, -20);
 
- const type = "These are the goals that have been set";
- memoryService.pushAttentionItem(type, item);
- memoryService.spliceAttentionItems(type, -20);
+	chatService.infoLine(`Added goal`);
 
-  chatService.infoLine((`Added goal`));
-
- return `Added goal`;
+	return `Added goal`;
 }
 
-export const description = "Add a goal to the persistent chat memory, to guide future chats.";
+export const description =
+	"Add a goal to the persistent chat memory, to guide future chats.";
 export const parameters = z.object({
-  item: z.string().describe("The goal to add to memory (max 10)")
+	item: z.string().describe("The goal to add to memory (max 10)"),
 });
