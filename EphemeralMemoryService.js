@@ -3,9 +3,6 @@ import MemoryService from "./MemoryService.js";
 export default class EphemeralMemoryService extends MemoryService {
 	name = "EphemeralMemoryService";
 	description = "Provides EphemeralMemory functionality";
-	constructor() {
-		super();
-	}
 
 	memories = [];
 	attentionItems = {};
@@ -42,7 +39,7 @@ export default class EphemeralMemoryService extends MemoryService {
 	 * @generator
 	 * @yields {MemoryItem} Memory object with role and content.
 	 */
-	async *getMemories(registry) {
+	async *getMemories(_registry) {
 		for (const memory of this.memories ?? []) {
 			yield memory;
 		}
@@ -54,7 +51,7 @@ export default class EphemeralMemoryService extends MemoryService {
 	 * @generator
 	 * @yields {AttentionItem} Attention Item with role and content.
 	 */
-	async *getAttentionItems(registry) {
+	async *getAttentionItems(_registry) {
 		const message = [];
 		for (const type in this.attentionItems) {
 			const items = this.attentionItems[type];

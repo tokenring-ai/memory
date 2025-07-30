@@ -67,7 +67,7 @@ export async function execute(remainder, registry) {
 			const type = args[0];
 			const index = Number.parseInt(args[1]);
 
-			if (!type || isNaN(index)) {
+			if (!type || Number.isNaN(index)) {
 				chatService.errorLine(
 					"Please provide both type and valid index number",
 				);
@@ -86,7 +86,7 @@ export async function execute(remainder, registry) {
 			const index = Number.parseInt(args[1]);
 			const newText = args.slice(2).join(" ");
 
-			if (!type || isNaN(index) || !newText) {
+			if (!type || Number.isNaN(index) || !newText) {
 				chatService.errorLine(
 					"Please provide type, valid index number, and new text",
 				);

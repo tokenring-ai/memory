@@ -18,7 +18,7 @@ export default class MemoryService extends Service {
 	 * @param {any} memory - The memory item to add.
 	 * @throws {Error} When called on the abstract base class.
 	 */
-	addMemory(memory) {
+	addMemory(_memory) {
 		throw new Error(
 			`The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
 		);
@@ -30,7 +30,7 @@ export default class MemoryService extends Service {
 	 * @param {any} item - The item to add to the attention list.
 	 * @throws {Error} When called on the abstract base class.
 	 */
-	pushAttentionItem(item) {
+	pushAttentionItem(_item) {
 		throw new Error(
 			`The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
 		);
@@ -66,7 +66,7 @@ export default class MemoryService extends Service {
 	 * @param {...any} items - The items to add to the memory list.
 	 * @throws {Error} When called on the abstract base class.
 	 */
-	spliceMemory(index, count, ...items) {
+	spliceMemory(_index, _count, ..._items) {
 		throw new Error(
 			`The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
 		);
@@ -80,7 +80,7 @@ export default class MemoryService extends Service {
 	 * @param {...any} items - The items to add to the attention list.
 	 * @throws {Error} When called on the abstract base class.
 	 */
-	spliceAttentionItems(index, count, ...items) {
+	spliceAttentionItems(_index, _count, ..._items) {
 		throw new Error(
 			`The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
 		);

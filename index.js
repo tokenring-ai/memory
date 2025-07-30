@@ -1,6 +1,6 @@
-export { default as MemoryService } from "./MemoryService.js";
-export { default as EphemeralMemoryService } from "./EphemeralMemoryService.js";
 export * as chatCommands from "./chatCommands.js";
+export { default as EphemeralMemoryService } from "./EphemeralMemoryService.js";
+export { default as MemoryService } from "./MemoryService.js";
 export * as tools from "./tools.js";
 
 export const name = "@token-ring/memory";

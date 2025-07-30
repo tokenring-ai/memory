@@ -47,7 +47,7 @@ export async function execute(remainder, registry) {
 
 		case "remove": {
 			const index = Number.parseInt(args[0]);
-			if (isNaN(index)) {
+			if (Number.isNaN(index)) {
 				chatService.errorLine("Please provide a valid index number");
 				return;
 			}
@@ -58,7 +58,7 @@ export async function execute(remainder, registry) {
 
 		case "set": {
 			const index = Number.parseInt(args[0]);
-			if (isNaN(index)) {
+			if (Number.isNaN(index)) {
 				chatService.errorLine("Please provide a valid index number");
 				return;
 			}
