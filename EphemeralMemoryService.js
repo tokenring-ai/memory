@@ -55,7 +55,7 @@ export default class EphemeralMemoryService extends MemoryService {
 	 * @yields {AttentionItem} Attention Item with role and content.
 	 */
 	async *getAttentionItems(registry) {
-		let message = [];
+		const message = [];
 		for (const type in this.attentionItems) {
 			const items = this.attentionItems[type];
 			if (items.length > 0) {

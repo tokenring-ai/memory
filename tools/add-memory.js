@@ -1,6 +1,6 @@
-import MemoryService from "../MemoryService.js";
 import ChatService from "@token-ring/chat/ChatService";
 import { z } from "zod";
+import MemoryService from "../MemoryService.js";
 
 /**
  * Memory tool: stores memories for future reference in the session.

@@ -65,7 +65,7 @@ export async function execute(remainder, registry) {
 
 		case "remove": {
 			const type = args[0];
-			const index = parseInt(args[1]);
+			const index = Number.parseInt(args[1]);
 
 			if (!type || isNaN(index)) {
 				chatService.errorLine(
@@ -83,7 +83,7 @@ export async function execute(remainder, registry) {
 
 		case "set": {
 			const type = args[0];
-			const index = parseInt(args[1]);
+			const index = Number.parseInt(args[1]);
 			const newText = args.slice(2).join(" ");
 
 			if (!type || isNaN(index) || !newText) {

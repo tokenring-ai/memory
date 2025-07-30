@@ -1,6 +1,6 @@
-import MemoryService from "../MemoryService.js";
 import ChatService from "@token-ring/chat/ChatService";
 import { z } from "zod";
+import MemoryService from "../MemoryService.js";
 
 /**
  * Goals tool: adds items to the goals list.
