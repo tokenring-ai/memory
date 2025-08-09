@@ -8,8 +8,8 @@
 		"@token-ring/utility": "0.1.0"
 	},
 	"exports": {
-		".": "./index.js",
-		"./*": "./*.js"
+		".": "./index.ts",
+		"./*": "./*.ts"
 	},
 	"license": "MIT",
 	"scripts": {
