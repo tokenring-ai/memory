@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import EphemeralMemoryService from "./EphemeralMemoryService.js";
+import EphemeralMemoryService from "../EphemeralMemoryService.js";
 
 describe("EphemeralMemoryService", () => {
 	let memoryService;
