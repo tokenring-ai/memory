@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import EphemeralMemoryService from "../EphemeralMemoryService.js";
+import EphemeralMemoryService from "../EphemeralMemoryService.ts";
 
 describe("EphemeralMemoryService", () => {
 	let memoryService;
@@ -17,8 +17,8 @@ describe("EphemeralMemoryService", () => {
 
 	// Test 2: Add and retrieve memories
 	it("should add and retrieve memories correctly", async () => {
-		const memory1 = { text: "Memory 1" };
-		const memory2 = { text: "Memory 2" };
+		const memory1 = "Memory 1";
+		const memory2 = "Memory 2";
 
 		memoryService.addMemory(memory1);
 		memoryService.addMemory(memory2);
@@ -34,8 +34,8 @@ describe("EphemeralMemoryService", () => {
 		}
 
 		expect(memories).toHaveLength(2);
-		expect(memories[0]).toBe(memory1);
-		expect(memories[1]).toBe(memory2);
+		expect(memories[0]).toStrictEqual({ role: "user", content: memory1 });
+		expect(memories[1]).toStrictEqual({ role: "user", content: memory2 });
 	});
 
 	// Test 3: Clear all memories

@@ -1,16 +1,17 @@
 import ChatService from "@token-ring/chat/ChatService";
 import MemoryService from "../MemoryService.ts";
+import {Registry} from "@token-ring/registry";
 
 export const description =
-  "/attention [add|clear|remove|set] [args...] - Manage attention items.";
+  "/attention [list|add|clear|remove|set] [args...] - Manage attention items.";
 
-export async function execute(remainder: string, registry: any) {
+export async function execute(remainder: string, registry: Registry) {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
 
-  // Show current attention items if no arguments provided
+  // Show help if no arguments provided
   if (!remainder?.trim()) {
-    await listAttentionItems(memoryService, chatService, registry);
+    help().forEach(line => chatService.systemLine(line));
     return;
   }
 
@@ -19,6 +20,11 @@ export async function execute(remainder: string, registry: any) {
   const args = parts.slice(1);
 
   switch (operation) {
+    case "list": {
+      await listAttentionItems(memoryService, chatService, registry);
+      return;
+    }
+      
     case "add": {
       const type = args[0];
       const itemText = args.slice(1).join(" ");
@@ -42,7 +48,7 @@ export async function execute(remainder: string, registry: any) {
         chatService.systemLine(`Cleared all attention items of type: ${type}`);
       } else {
         // Clear all types
-        for await (const item of memoryService.getAttentionItems("", registry)) {
+        for await (const item of memoryService.getAttentionItems(registry)) {
           const types = String(item.content).split("\n")[0]; // First line contains the type
           memoryService.clearAttentionItems(types);
         }
@@ -98,7 +104,7 @@ export async function execute(remainder: string, registry: any) {
   await listAttentionItems(memoryService, chatService, registry);
 }
 
-async function listAttentionItems(memoryService: any, chatService: any, registry: any) {
+async function listAttentionItems(memoryService: any, chatService: any, registry: Registry) {
   let hasItems = false;
 
   for await (const item of memoryService.getAttentionItems("", registry)) {
@@ -115,8 +121,9 @@ async function listAttentionItems(memoryService: any, chatService: any, registry
 
 export function help() {
   return [
-    "/attention [add|clear|remove|set] [args...]",
-    "  - No arguments: shows all attention items by type",
+    "/attention [list|add|clear|remove|set] [args...]",
+    "  - No arguments: shows this help message",
+    "  - list: shows all attention items by type",
     "  - add <type> <text>: adds a new attention item of specified type",
     "  - clear [type]: clears all attention items (or just specified type)",
     "  - remove <type> <index>: removes attention item at specified index for given type",
