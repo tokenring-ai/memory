@@ -1,5 +1,5 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { z } from "zod";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 import {Registry} from "@token-ring/registry";
 

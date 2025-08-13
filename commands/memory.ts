@@ -1,6 +1,6 @@
 import ChatService from "@token-ring/chat/ChatService";
 import MemoryService from "../MemoryService.ts";
-import { Registry } from "@token-ring/registry";
+import {Registry} from "@token-ring/registry";
 
 export const description =
     "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
