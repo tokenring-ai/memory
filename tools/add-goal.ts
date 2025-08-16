@@ -1,12 +1,12 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
-import { Registry } from "@token-ring/registry";
 
 /**
  * Goals tool: adds items to the goals list.
  */
-export async function execute({ item }: { item?: string }, registry: Registry) : Promise<string|{error: string}> {
+export async function execute({item}: { item?: string }, registry: Registry): Promise<string | { error: string }> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
 
@@ -15,7 +15,7 @@ export async function execute({ item }: { item?: string }, registry: Registry) :
     // Output error with tool name prefix
     chatService.errorLine(`[add-goal] Missing item parameter for the goal`);
     // Return standardized error object
-    return { error: "Missing item parameter for the goal" } as { error: string };
+    return {error: "Missing item parameter for the goal"} as { error: string };
   }
 
   const type = "These are the goals that have been set";

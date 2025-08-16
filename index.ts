@@ -5,6 +5,6 @@ export const version = packageJSON.version;
 export const description = packageJSON.description;
 
 export * as chatCommands from "./chatCommands.ts";
-export { default as EphemeralMemoryService } from "./EphemeralMemoryService.ts";
-export { default as MemoryService } from "./MemoryService.ts";
+export {default as EphemeralMemoryService} from "./EphemeralMemoryService.ts";
+export {default as MemoryService} from "./MemoryService.ts";
 export * as tools from "./tools.ts";

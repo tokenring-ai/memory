@@ -1,6 +1,6 @@
-import MemoryService from "./MemoryService.ts";
 import {Registry} from "@token-ring/registry";
 import {AttentionItemMessage, MemoryItemMessage} from "@token-ring/registry/Service";
+import MemoryService from "./MemoryService.ts";
 
 export default class EphemeralMemoryService extends MemoryService {
   name = "EphemeralMemoryService";
@@ -12,9 +12,11 @@ export default class EphemeralMemoryService extends MemoryService {
   addMemory(memory: string): void {
     this.memories.push(memory);
   }
+
   clearMemory(): void {
     this.memories = [];
   }
+
   spliceMemory(index: number, count: number, ...items: string[]): void {
     this.memories.splice(index, count, ...items);
   }
@@ -39,11 +41,11 @@ export default class EphemeralMemoryService extends MemoryService {
   /**
    * Asynchronously yields memories
    */
-  async *getMemories(_registry: Registry): AsyncGenerator<MemoryItemMessage> {
+  async* getMemories(_registry: Registry): AsyncGenerator<MemoryItemMessage> {
     for (const memory of this.memories ?? []) {
       yield {
-          role: "user",
-          content: memory
+        role: "user",
+        content: memory
       };
     }
   }
@@ -51,7 +53,7 @@ export default class EphemeralMemoryService extends MemoryService {
   /**
    * Asynchronously yields attention items
    */
-  async *getAttentionItems(_registry: Registry): AsyncGenerator<AttentionItemMessage> {
+  async* getAttentionItems(_registry: Registry): AsyncGenerator<AttentionItemMessage> {
     const message: string[] = [];
     for (const type in this.attentionItems) {
       const items = this.attentionItems[type];
@@ -64,7 +66,7 @@ export default class EphemeralMemoryService extends MemoryService {
     }
 
     if (message.length > 0) {
-      yield { role: "user", content: message.join("\n") };
+      yield {role: "user", content: message.join("\n")};
     }
   }
 }

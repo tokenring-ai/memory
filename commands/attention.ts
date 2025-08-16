@@ -1,6 +1,6 @@
 import ChatService from "@token-ring/chat/ChatService";
-import MemoryService from "../MemoryService.ts";
 import {Registry} from "@token-ring/registry";
+import MemoryService from "../MemoryService.ts";
 
 export const description =
   "/attention [list|add|clear|remove|set] [args...] - Manage attention items.";
@@ -24,7 +24,7 @@ export async function execute(remainder: string, registry: Registry) {
       await listAttentionItems(memoryService, chatService, registry);
       return;
     }
-      
+
     case "add": {
       const type = args[0];
       const itemText = args.slice(1).join(" ");

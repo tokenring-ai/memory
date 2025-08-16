@@ -1,19 +1,19 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
-import { Registry } from "@token-ring/registry";
 
 /**
  * Focus tool: adds items to the current focus list.
  */
-export async function execute({ item }: { item?: string }, registry: Registry)  : Promise<string|{error: string}> {
+export async function execute({item}: { item?: string }, registry: Registry): Promise<string | { error: string }> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
   const toolName = "add-focus";
 
   if (!item) {
     chatService.errorLine(`[${toolName}] Missing item parameter for the focus`);
-    return { error: "Missing item parameter for the focus" };
+    return {error: "Missing item parameter for the focus"};
   }
 
   const type = "Focus on these items";
