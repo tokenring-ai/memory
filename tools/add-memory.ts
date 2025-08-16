@@ -1,24 +1,29 @@
 import ChatService from "@token-ring/chat/ChatService";
-import {z} from "zod";
+import { z } from "zod";
 import MemoryService from "../MemoryService.ts";
-import {Registry} from "@token-ring/registry";
+import { Registry } from "@token-ring/registry";
 
 /**
  * Memory tool: stores memories for future reference in the session.
  */
-export async function execute({ memory }: { memory?: string }, registry: Registry) {
+export async function execute(
+  { memory }: { memory?: string },
+  registry: Registry
+)  : Promise<string|{error: string}> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
+  const toolName = "add-memory";
 
-    if (!memory) {
-        chatService.errorLine(`Missing memory parameter for the focus`);
-        return "Please provide a memory parameter"
-    }
+  if (!memory) {
+    const errorMsg = "Missing memory parameter for the focus";
+    chatService.errorLine(`[${toolName}] ${errorMsg}`);
+    return { error: errorMsg };
+  }
 
   memoryService.addMemory(memory);
 
-  chatService.infoLine(`Added new memory`);
-  return `Memory added`;
+  chatService.infoLine(`[${toolName}] Added new memory`);
+  return "Memory added";
 }
 
 export const description =
