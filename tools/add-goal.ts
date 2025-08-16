@@ -1,21 +1,20 @@
 import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
-import {z} from "zod";
+import { Registry } from "@token-ring/registry";
+import { z } from "zod";
 import MemoryService from "../MemoryService.ts";
 
 /**
  * Goals tool: adds items to the goals list.
  */
-export async function execute({item}: { item?: string }, registry: Registry): Promise<string | { error: string }> {
+export const name = "memory/add-goal";
+
+export async function execute({ item }: { item?: string }, registry: Registry): Promise<string> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
 
-
   if (!item) {
-    // Output error with tool name prefix
-    chatService.errorLine(`[add-goal] Missing item parameter for the goal`);
-    // Return standardized error object
-    return {error: "Missing item parameter for the goal"} as { error: string };
+    // Throw error with tool name prefix
+    throw new Error(`[${name}] Missing item parameter for the goal`);
   }
 
   const type = "These are the goals that have been set";
@@ -24,9 +23,9 @@ export async function execute({item}: { item?: string }, registry: Registry): Pr
   memoryService.spliceAttentionItems(type, -20);
 
   // Inform user of successful addition
-  chatService.infoLine(`[add-goal] Added goal`);
+  chatService.infoLine(`[${name}] Added goal`);
 
-  // Return a success message (can be a simple string or object as needed)
+  // Return a success message
   return "Added goal";
 }
 
