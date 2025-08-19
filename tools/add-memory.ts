@@ -1,6 +1,6 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { Registry } from "@token-ring/registry";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
 /**
@@ -9,7 +9,7 @@ import MemoryService from "../MemoryService.ts";
 export const name = "memory/add-memory";
 
 export async function execute(
-  { memory }: { memory?: string },
+  {memory}: { memory?: string },
   registry: Registry
 ): Promise<string> {
   const chatService = registry.requireFirstServiceByType(ChatService);
@@ -28,6 +28,6 @@ export async function execute(
 export const description =
   "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.";
 
-export const parameters = z.object({
+export const inputSchema = z.object({
   memory: z.string().describe("The fact, idea, or info to remember."),
 });

@@ -99,6 +99,7 @@ async function listMemories(memoryService: any, chatService: any, registry: Regi
   }
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function help() {
   return [
     "/memory [list|add|clear|remove|set] [args...]",

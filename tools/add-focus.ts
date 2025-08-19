@@ -1,6 +1,6 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { Registry } from "@token-ring/registry";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
 /**
@@ -9,7 +9,7 @@ import MemoryService from "../MemoryService.ts";
 export const name = "memory/add-focus";
 
 export async function execute(
-  { item }: { item?: string },
+  {item}: { item?: string },
   registry: Registry
 ): Promise<string> {
   const chatService = registry.requireFirstServiceByType(ChatService);
@@ -30,6 +30,6 @@ export async function execute(
 
 export const description =
   "Add an item to focus on (max 5). The item will be presented in future chats to keep the focus on the current topic.";
-export const parameters = z.object({
+export const inputSchema = z.object({
   item: z.string().describe("The item to add to the focus list."),
 });

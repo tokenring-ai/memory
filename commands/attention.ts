@@ -119,6 +119,7 @@ async function listAttentionItems(memoryService: any, chatService: any, registry
   }
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function help() {
   return [
     "/attention [list|add|clear|remove|set] [args...]",

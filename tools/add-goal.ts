@@ -1,6 +1,6 @@
 import ChatService from "@token-ring/chat/ChatService";
-import { Registry } from "@token-ring/registry";
-import { z } from "zod";
+import {Registry} from "@token-ring/registry";
+import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
 /**
@@ -8,7 +8,7 @@ import MemoryService from "../MemoryService.ts";
  */
 export const name = "memory/add-goal";
 
-export async function execute({ item }: { item?: string }, registry: Registry): Promise<string> {
+export async function execute({item}: { item?: string }, registry: Registry): Promise<string> {
   const chatService = registry.requireFirstServiceByType(ChatService);
   const memoryService = registry.requireFirstServiceByType(MemoryService);
 
@@ -31,6 +31,6 @@ export async function execute({ item }: { item?: string }, registry: Registry): 
 
 export const description =
   "Add a goal to the persistent chat memory, to guide future chats.";
-export const parameters = z.object({
+export const inputSchema = z.object({
   item: z.string().describe("The goal to add to memory (max 10)"),
 });
