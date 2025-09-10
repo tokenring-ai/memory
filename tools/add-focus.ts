@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
@@ -10,10 +9,9 @@ export const name = "memory/add-focus";
 
 export async function execute(
   {item}: { item?: string },
-  registry: Registry
+  agent: Agent
 ): Promise<string> {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(MemoryService);
 
   if (!item) {
     throw new Error(`[${name}] Missing item parameter for the focus`);
@@ -24,7 +22,7 @@ export async function execute(
   // keep last 10 (remove everything before the last 10)
   memoryService.spliceAttentionItems(type, -10);
 
-  chatService.infoLine(`[${name}] Added to focus`);
+  agent.infoLine(`[${name}] Added to focus`);
   return `Added to focus`;
 }
 

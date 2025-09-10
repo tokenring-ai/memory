@@ -1,5 +1,5 @@
-import {Registry, Service} from "@token-ring/registry";
-import {AttentionItemMessage, MemoryItemMessage} from "@token-ring/registry/Service";
+import {Agent} from "@tokenring-ai/agent";
+import {AttentionItemMessage, MemoryItemMessage, TokenRingService} from "@tokenring-ai/agent/types";
 
 
 /**
@@ -7,7 +7,7 @@ import {AttentionItemMessage, MemoryItemMessage} from "@token-ring/registry/Serv
  * Provides a foundation for managing memory and attention items.
  * Subclasses must implement the abstract methods.
  */
-export default class MemoryService extends Service {
+export default class MemoryService implements TokenRingService {
   name = "MemoryService";
   description = "Provides Memory functionality";
 
@@ -60,13 +60,13 @@ export default class MemoryService extends Service {
   }
 
   // Async generators to be optionally implemented by subclasses
-  async* getMemories(_registry: Registry): AsyncGenerator<MemoryItemMessage> {
+  async* getMemories(_agent: Agent): AsyncGenerator<MemoryItemMessage> {
     throw new Error(
       `The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
     );
   }
 
-  async* getAttentionItems(_registry: Registry): AsyncGenerator<AttentionItemMessage> {
+  async* getAttentionItems(_agent: Agent): AsyncGenerator<AttentionItemMessage> {
     throw new Error(
       `The ${import.meta.filename} class is abstract and cannot be used directly. Please use a subclass instead.`,
     );

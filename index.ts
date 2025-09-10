@@ -1,10 +1,16 @@
+import {TokenRingPackage} from "@tokenring-ai/agent";
+
+import * as chatCommands from "./chatCommands.ts";
 import packageJSON from './package.json' with {type: 'json'};
+import * as tools from "./tools.ts";
 
-export const name = packageJSON.name;
-export const version = packageJSON.version;
-export const description = packageJSON.description;
+export const packageInfo: TokenRingPackage = {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
+  chatCommands,
+  tools
+};
 
-export * as chatCommands from "./chatCommands.ts";
 export {default as EphemeralMemoryService} from "./EphemeralMemoryService.ts";
 export {default as MemoryService} from "./MemoryService.ts";
-export * as tools from "./tools.ts";

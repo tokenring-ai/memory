@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
@@ -10,10 +9,9 @@ export const name = "memory/add-memory";
 
 export async function execute(
   {memory}: { memory?: string },
-  registry: Registry
+  agent: Agent
 ): Promise<string> {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(MemoryService);
 
   if (!memory) {
     throw new Error(`[${name}] Missing memory parameter for the focus`);
@@ -21,7 +19,7 @@ export async function execute(
 
   memoryService.addMemory(memory);
 
-  chatService.infoLine(`[${name}] Added new memory`);
+  agent.infoLine(`[${name}] Added new memory`);
   return "Memory added";
 }
 

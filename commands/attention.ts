@@ -1,17 +1,15 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import MemoryService from "../MemoryService.ts";
 
 export const description =
   "/attention [list|add|clear|remove|set] [args...] - Manage attention items.";
 
-export async function execute(remainder: string, registry: Registry) {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+export async function execute(remainder: string, agent: Agent) {
+  const memoryService = agent.requireFirstServiceByType(MemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {
-    help().forEach(line => chatService.systemLine(line));
+    help().forEach(line => agent.infoLine(line));
     return;
   }
 
@@ -21,7 +19,7 @@ export async function execute(remainder: string, registry: Registry) {
 
   switch (operation) {
     case "list": {
-      await listAttentionItems(memoryService, chatService, registry);
+      await listAttentionItems(memoryService, agent);
       return;
     }
 
@@ -30,14 +28,14 @@ export async function execute(remainder: string, registry: Registry) {
       const itemText = args.slice(1).join(" ");
 
       if (!type || !itemText) {
-        chatService.errorLine(
+        agent.errorLine(
           "Please provide both type and text for the attention item",
         );
         return;
       }
 
       memoryService.pushAttentionItem(type, itemText);
-      chatService.systemLine(`Added new ${type} attention item: ${itemText}`);
+      agent.infoLine(`Added new ${type} attention item: ${itemText}`);
       break;
     }
 
@@ -45,14 +43,14 @@ export async function execute(remainder: string, registry: Registry) {
       const type = args[0];
       if (type) {
         memoryService.clearAttentionItems(type);
-        chatService.systemLine(`Cleared all attention items of type: ${type}`);
+        agent.infoLine(`Cleared all attention items of type: ${type}`);
       } else {
         // Clear all types
-        for await (const item of memoryService.getAttentionItems(registry)) {
+        for await (const item of memoryService.getAttentionItems(agent)) {
           const types = String(item.content).split("\n")[0]; // First line contains the type
           memoryService.clearAttentionItems(types);
         }
-        chatService.systemLine("Cleared all attention items");
+        agent.infoLine("Cleared all attention items");
       }
       break;
     }
@@ -62,14 +60,14 @@ export async function execute(remainder: string, registry: Registry) {
       const index = Number.parseInt(args[1]);
 
       if (!type || Number.isNaN(index)) {
-        chatService.errorLine(
+        agent.errorLine(
           "Please provide both type and valid index number",
         );
         return;
       }
 
       memoryService.spliceAttentionItems(type, index, 1);
-      chatService.systemLine(
+      agent.infoLine(
         `Removed ${type} attention item at index ${index}`,
       );
       break;
@@ -81,41 +79,41 @@ export async function execute(remainder: string, registry: Registry) {
       const newText = args.slice(2).join(" ");
 
       if (!type || Number.isNaN(index) || !newText) {
-        chatService.errorLine(
+        agent.errorLine(
           "Please provide type, valid index number, and new text",
         );
         return;
       }
 
       memoryService.spliceAttentionItems(type, index, 1, newText);
-      chatService.systemLine(
+      agent.infoLine(
         `Updated ${type} attention item at index ${index}`,
       );
       break;
     }
 
     default:
-      chatService.errorLine("Unknown operation. ");
+      agent.errorLine("Unknown operation. ");
       // Intentionally not calling help()
       return;
   }
 
   // Show updated attention items after operation
-  await listAttentionItems(memoryService, chatService, registry);
+  await listAttentionItems(memoryService, agent);
 }
 
-async function listAttentionItems(memoryService: any, chatService: any, registry: Registry) {
+async function listAttentionItems(memoryService: any, agent: Agent) {
   let hasItems = false;
 
-  for await (const item of memoryService.getAttentionItems("", registry)) {
+  for await (const item of memoryService.getAttentionItems("", agent)) {
     hasItems = true;
     for (const line of String(item.content).split("\n")) {
-      chatService.systemLine(line);
+      agent.infoLine(line);
     }
   }
 
   if (!hasItems) {
-    chatService.systemLine("No attention items stored");
+    agent.infoLine("No attention items stored");
   }
 }
 

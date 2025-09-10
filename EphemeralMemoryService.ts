@@ -1,5 +1,5 @@
-import {Registry} from "@token-ring/registry";
-import {AttentionItemMessage, MemoryItemMessage} from "@token-ring/registry/Service";
+import Agent from "@tokenring-ai/agent/Agent";
+import {AttentionItemMessage, MemoryItemMessage} from "@tokenring-ai/agent/types";
 import MemoryService from "./MemoryService.ts";
 
 export default class EphemeralMemoryService extends MemoryService {
@@ -41,7 +41,7 @@ export default class EphemeralMemoryService extends MemoryService {
   /**
    * Asynchronously yields memories
    */
-  async* getMemories(_registry: Registry): AsyncGenerator<MemoryItemMessage> {
+  async* getMemories(_agent: Agent): AsyncGenerator<MemoryItemMessage> {
     for (const memory of this.memories ?? []) {
       yield {
         role: "user",
@@ -53,7 +53,7 @@ export default class EphemeralMemoryService extends MemoryService {
   /**
    * Asynchronously yields attention items
    */
-  async* getAttentionItems(_registry: Registry): AsyncGenerator<AttentionItemMessage> {
+  async* getAttentionItems(_agent: Agent): AsyncGenerator<AttentionItemMessage> {
     const message: string[] = [];
     for (const type in this.attentionItems) {
       const items = this.attentionItems[type];

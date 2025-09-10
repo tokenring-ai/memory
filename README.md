@@ -1,4 +1,4 @@
-# @token-ring/memory
+# @tokenring-ai/memory
 
 Memory and attention management for Token Ring. This package provides a Service interface and a simple in-memory
 implementation to:
@@ -14,13 +14,13 @@ chat commands (/memory, /attention), and tools (add-memory, add-focus, add-goal)
 
 This package is part of the Token Ring monorepo and is referenced as:
 
-- Name: `@token-ring/memory`
+- Name: `@tokenring-ai/memory`
 - Version: `0.1.0`
 
 It relies on these peer packages being present/registered in your app:
 
-- `@token-ring/registry`
-- `@token-ring/chat`
+- `@tokenring-ai/registry`
+- `@tokenring-ai/chat`
 
 ## What it does
 
@@ -33,7 +33,7 @@ It relies on these peer packages being present/registered in your app:
 
 ## Exports
 
-From `@token-ring/memory`:
+From `@tokenring-ai/memory`:
 
 - `MemoryService` (abstract base class)
 - `EphemeralMemoryService` (concrete implementation)
@@ -132,9 +132,9 @@ Designed for agent use, but callable directly as functions too.
 Register a memory service (typically the ephemeral one) into your Registry alongside ChatService.
 
 ```ts
-import {ServiceRegistry} from "@token-ring/registry";
-import {ChatService} from "@token-ring/chat";
-import {EphemeralMemoryService} from "@token-ring/memory";
+import {ServiceRegistry} from "@tokenring-ai/registry";
+import {ChatService} from "@tokenring-ai/chat";
+import {EphemeralMemoryService} from "@tokenring-ai/memory";
 
 const registry = new ServiceRegistry();
 await registry.start();

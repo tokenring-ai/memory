@@ -1,5 +1,4 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
 import MemoryService from "../MemoryService.ts";
 
@@ -8,9 +7,8 @@ import MemoryService from "../MemoryService.ts";
  */
 export const name = "memory/add-goal";
 
-export async function execute({item}: { item?: string }, registry: Registry): Promise<string> {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+export async function execute({item}: { item?: string }, agent: Agent): Promise<string> {
+  const memoryService = agent.requireFirstServiceByType(MemoryService);
 
   if (!item) {
     // Throw error with tool name prefix
@@ -23,7 +21,7 @@ export async function execute({item}: { item?: string }, registry: Registry): Pr
   memoryService.spliceAttentionItems(type, -20);
 
   // Inform user of successful addition
-  chatService.infoLine(`[${name}] Added goal`);
+  agent.infoLine(`[${name}] Added goal`);
 
   // Return a success message
   return "Added goal";

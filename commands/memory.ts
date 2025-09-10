@@ -1,17 +1,15 @@
-import ChatService from "@token-ring/chat/ChatService";
-import {Registry} from "@token-ring/registry";
+import Agent from "@tokenring-ai/agent/Agent";
 import MemoryService from "../MemoryService.ts";
 
 export const description =
   "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
 
-export async function execute(remainder: string, registry: Registry) {
-  const chatService = registry.requireFirstServiceByType(ChatService);
-  const memoryService = registry.requireFirstServiceByType(MemoryService);
+export async function execute(remainder: string, agent: Agent) {
+  const memoryService = agent.requireFirstServiceByType(MemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {
-    help().forEach(line => chatService.systemLine(line));
+    help().forEach(line => agent.infoLine(line));
     return;
   }
 
@@ -21,81 +19,81 @@ export async function execute(remainder: string, registry: Registry) {
 
   switch (operation) {
     case "list": {
-      await listMemories(memoryService, chatService, registry);
+      await listMemories(memoryService, agent);
       return;
     }
 
     case "add": {
       const memoryText = args.join(" ");
       if (!memoryText) {
-        chatService.errorLine("Please provide text for the memory item");
+        agent.errorLine("Please provide text for the memory item");
         return;
       }
       memoryService.addMemory(memoryText);
-      chatService.systemLine(`Added new memory: ${memoryText}`);
+      agent.infoLine(`Added new memory: ${memoryText}`);
       break;
     }
 
     case "clear": {
       memoryService.clearMemory();
-      chatService.systemLine("Cleared all memory items");
+      agent.infoLine("Cleared all memory items");
       break;
     }
 
     case "remove": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        chatService.errorLine("Please provide a valid index number");
+        agent.errorLine("Please provide a valid index number");
         return;
       }
       memoryService.spliceMemory(index, 1);
-      chatService.systemLine(`Removed memory item at index ${index}`);
+      agent.infoLine(`Removed memory item at index ${index}`);
       break;
     }
 
     case "set": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        chatService.errorLine("Please provide a valid index number");
+        agent.errorLine("Please provide a valid index number");
         return;
       }
       const newText = args.slice(1).join(" ");
       if (!newText) {
-        chatService.errorLine("Please provide text for the memory item");
+        agent.errorLine("Please provide text for the memory item");
         return;
       }
       memoryService.spliceMemory(index, 1, newText)
-      chatService.systemLine(`Updated memory item at index ${index}`);
+      agent.infoLine(`Updated memory item at index ${index}`);
       break;
     }
 
     default:
-      chatService.errorLine("Unknown operation. ");
+      agent.errorLine("Unknown operation. ");
       // Intentionally not calling help() bound to this
       return;
   }
 
   // Show updated memories after operation
-  await listMemories(memoryService, chatService, registry);
+  await listMemories(memoryService, agent);
 }
 
-async function listMemories(memoryService: any, chatService: any, registry: Registry) {
+async function listMemories(memoryService: any, agent: Agent) {
   let index = 0;
 
-  for await (const memory of memoryService.getMemories("", registry)) {
+  for await (const memory of memoryService.getMemories("", agent)) {
     if (index === 0) {
-      chatService.systemLine("Memory items:");
+      agent.infoLine("Memory items:");
     }
     const lines = String(memory.content ?? "").split("\n");
-    chatService.systemLine(`[${index}] ${lines[0]}`);
+    agent.infoLine(`[${index}] ${lines[0]}`);
     for (let i = 1; i < lines.length; i++) {
-      chatService.systemLine(`[${index}]  ${lines[i]}`);
+      agent.infoLine(`[${index}]  ${lines[i]}`);
     }
     index++;
   }
 
   if (index === 0) {
-    chatService.systemLine("No memory items stored");
+    agent.infoLine("No memory items stored");
   }
 }
 

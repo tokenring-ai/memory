@@ -1,4 +1,3 @@
-import {Registry} from "@token-ring/registry";
 import {beforeEach, describe, expect, it} from "vitest";
 import EphemeralMemoryService from "../EphemeralMemoryService.ts";
 
@@ -31,7 +30,7 @@ describe("EphemeralMemoryService", () => {
 
     // Test the generator function
     const memories: { role: string; content: string }[] = [];
-    for await (const memory of memoryService.getMemories(registry)) {
+    for await (const memory of memoryService.getMemories(agent)) {
       memories.push(memory);
     }
 
@@ -118,7 +117,7 @@ describe("EphemeralMemoryService", () => {
 
     // Test the generator function
     const messages: { role: string; content: string }[] = [];
-    for await (const message of memoryService.getAttentionItems(registry)) {
+    for await (const message of memoryService.getAttentionItems(agent)) {
       messages.push(message);
     }
 
@@ -208,7 +207,7 @@ describe("EphemeralMemoryService", () => {
   it("should format attention items output correctly", async () => {
     // Empty attention items should yield no messages
     let messages: { role: string; content: string }[] = [];
-    for await (const message of memoryService.getAttentionItems(registry)) {
+    for await (const message of memoryService.getAttentionItems(agent)) {
       messages.push(message);
     }
     expect(messages).toHaveLength(0);
@@ -220,7 +219,7 @@ describe("EphemeralMemoryService", () => {
 
     // Get formatted messages
     messages = [];
-    for await (const message of memoryService.getAttentionItems(registry)) {
+    for await (const message of memoryService.getAttentionItems(agent)) {
       messages.push(message);
     }
 
@@ -237,7 +236,7 @@ describe("EphemeralMemoryService", () => {
 
     // Should yield no messages again
     messages = [];
-    for await (const message of memoryService.getAttentionItems(registry)) {
+    for await (const message of memoryService.getAttentionItems(agent)) {
       messages.push(message);
     }
     expect(messages).toHaveLength(0);
