@@ -1,172 +1,179 @@
-# @tokenring-ai/memory
+# Memory Package Documentation
 
-Memory and attention management for Token Ring. This package provides a Service interface and a simple in-memory
-implementation to:
+## Overview
 
-- Store short-lived “memories” that can be surfaced back to the assistant in future turns.
-- Track lightweight “attention” items (e.g., goals or focus) grouped by type and rendered as succinct user messages.
-- Expose chat commands and agent tools so users and agents can manage these lists during a session.
+The `@tokenring-ai/memory` package provides memory management functionality for AI agents within the TokenRing framework. It handles short-term, ephemeral storage of memories (simple facts or information) and attention items (categorized lists like goals or focus areas). This allows agents to maintain context across interactions without persistent storage. The package includes an abstract base class for extensibility and a concrete in-memory implementation. It integrates with the TokenRing agent system via tools for adding items and chat commands for manual management.
 
-Current status: Includes an abstract base class (MemoryService), an in-memory implementation (EphemeralMemoryService),
-chat commands (/memory, /attention), and tools (add-memory, add-focus, add-goal).
+Key features:
+- Store and retrieve memories as strings.
+- Manage categorized attention items (e.g., goals, focus).
+- Async generators for yielding memories and attention in agent contexts.
+- Tools and chat commands for interaction.
 
-## Installation
+This package is designed for use in AI agent applications, enhancing context awareness during conversations or tasks.
 
-This package is part of the Token Ring monorepo and is referenced as:
+## Installation/Setup
 
-- Name: `@tokenring-ai/memory`
-- Version: `0.1.0`
+This package is part of the TokenRing AI ecosystem. To use it:
 
-It relies on these peer packages being present/registered in your app:
+1. Ensure you have Node.js (v18+) installed.
+2. Install via npm (assuming it's published) or add as a local dependency:
+   ```
+   npm install @tokenring-ai/memory
+   ```
+   Or, if building from source:
+   ```
+   npm install @tokenring-ai/agent@0.1.0 @tokenring-ai/utility@0.1.0
+   # Then link or build the memory package
+   ```
 
-- `@tokenring-ai/registry`
-- `@tokenring-ai/chat`
+3. Import and instantiate in your agent setup:
+   ```typescript
+   import { EphemeralMemoryService } from '@tokenring-ai/memory';
+   const memoryService = new EphemeralMemoryService();
+   // Register with agent
+   ```
 
-## What it does
+No additional configuration is required for the ephemeral implementation. For persistent storage, extend `MemoryService`.
 
-- Provides a MemoryService interface for storing and retrieving messages that should influence future responses.
-- Separately tracks “attention” items by type (e.g., Focus…, Goals…), yielding them as a compact, readable message.
-- Ships with an EphemeralMemoryService that keeps everything in process memory (lost on restart), suitable for local/dev
-  sessions.
-- Integrates with ChatService to report actions and list items.
-- Exposes tools and chat commands so both agents and users can manage memory/attention quickly.
+## Package Structure
 
-## Exports
+The package is organized as follows:
 
-From `@tokenring-ai/memory`:
+- **index.ts**: Main entry point, exports package info, tools, chat commands, and core classes.
+- **MemoryService.ts**: Abstract base class defining the memory API.
+- **EphemeralMemoryService.ts**: Concrete implementation using in-memory arrays.
+- **tools.ts**: Exports agent tools (add-memory, add-goal, add-focus).
+  - **tools/add-memory.ts**: Tool to add a memory item.
+  - **tools/add-goal.ts**: Tool to add a goal to attention (limits to last 20).
+  - **tools/add-focus.ts**: Tool to add a focus item to attention (limits to last 10).
+- **chatCommands.ts**: Exports chat commands (/memory, /attention).
+  - **commands/memory.ts**: Commands for managing memories (list, add, clear, remove, set).
+  - **commands/attention.ts**: Commands for managing attention items (list, add, clear, remove, set).
+- **package.json**: Package metadata and exports.
+- **test/**: Unit tests (e.g., EphemeralMemoryService.test.ts).
+- **LICENSE**: MIT license.
 
-- `MemoryService` (abstract base class)
-- `EphemeralMemoryService` (concrete implementation)
-- `chatCommands` namespace
-- `chatCommands.memory` → `/memory` command
-- `chatCommands.attention` → `/attention` command
-- `tools` namespace
-- `tools.addMemory`
-- `tools.addFocus`
-- `tools.addGoal`
+## Core Components
 
-## Core classes
+### MemoryService (Abstract Base Class)
 
-### MemoryService (abstract)
+Defines the interface for memory services. Extend this for custom implementations.
 
-Defines the contract for memory/attention providers.
+- **Properties**:
+  - `name: string` - Service name (e.g., "MemoryService").
+  - `description: string` - Service description.
 
-Key methods to implement/override in subclasses:
+- **Key Methods**:
+  - `addMemory(memory: string): void` - Adds a memory string to the list.
+  - `clearMemory(): void` - Clears all memories.
+  - `spliceMemory(index: number, count?: number, ...items: string[]): void` - Modifies the memory array (remove/replace/insert).
+  - `pushAttentionItem(type: string, item: string): void` - Adds an item to a typed attention list.
+  - `clearAttentionItems(type?: string): void` - Clears attention items (all or by type).
+  - `spliceAttentionItems(type: string, index: number, count?: number, ...items: string[]): void` - Modifies a typed attention list.
+  - `async *getMemories(agent: Agent): AsyncGenerator<MemoryItemMessage>` - Yields memories as chat messages.
+  - `async *getAttentionItems(agent: Agent): AsyncGenerator<AttentionItemMessage>` - Yields formatted attention items as chat messages.
 
-- addMemory(memory: string): void
-- clearMemory(): void
-- spliceMemory(index: number, count?: number, ...items: string[]): void
-- pushAttentionItem(type: string, item: string): void
-- clearAttentionItems(type?: string): void
-- spliceAttentionItems(type: string, index: number, count?: number, ...items: string[]): void
+All methods throw errors if called directly on the abstract class.
 
-Async generators (consumed by other services to surface context back to the LLM):
+### EphemeralMemoryService (Concrete Implementation)
 
-- async *getMemories(registry): yields MemoryItemMessage
-- async *getAttentionItems(registry): yields AttentionItemMessage
+In-memory storage for memories and attention. Extends `MemoryService`.
 
-### EphemeralMemoryService
+- **Internal State**:
+  - `memories: string[]` - Array of memory strings.
+  - `attentionItems: Record<string, string[]>` - Map of type to array of items.
 
-A minimal in-memory implementation backed by arrays and simple string formatting.
+- **Implemented Methods**:
+  - Inherits and implements all from `MemoryService`.
+  - `getMemories`: Yields each memory as `{ role: "user", content: memory }`.
+  - `getAttentionItems`: Formats attention by type (e.g., "Goals\n- item1\n- item2") and yields as a single message if items exist.
+  - Additional: `unshiftAttentionItem(type: string, item: string): void` - Adds to the front of the list.
 
-- Stores `memories: string[]`.
-- Stores `attentionItems: Record<string, string[]>` keyed by type.
-- Yields memories one by one as `{ role: "user", content: <memory> }`.
-- Yields attention as a single compact message, grouping items by type:
-- Example content:
-- `Focus on these items`\n`- Item A`\n`- Item B`\n`These are the goals that have been set`\n`- Goal 1`
+Interactions: Memories are flat; attention is categorical. Tools and commands use these methods to update state, which is then yielded in agent contexts for context injection.
 
-Limitations:
+### Tools
 
-- Ephemeral: contents are not persisted and will be lost when the process stops.
+Agent tools for programmatic addition:
+- `memory/add-memory`: Adds to `memories` via `addMemory`. Input: `{ memory: string }`.
+- `memory/add-goal`: Adds to attention type "These are the goals that have been set", limits to last 20 via `spliceAttentionItems`. Input: `{ item: string }`.
+- `memory/add-focus`: Adds to attention type "Focus on these items", limits to last 10. Input: `{ item: string }`.
 
-## Chat commands
+### Chat Commands
 
-These are exported via `chatCommands` and integrate with ChatService.
+Slash commands for interactive management:
+- `/memory [op] [args]`: Ops: `list` (shows indexed memories), `add <text>`, `clear`, `remove <index>`, `set <index> <text>`.
+- `/attention [op] [args]`: Similar, but with `<type>` support: `add <type> <text>`, `clear [type]`, `remove <type> <index>`, `set <type> <index> <text>`.
 
-### /memory
+These use `agent.infoLine`/`errorLine` for output and list items via generators.
 
-Manage general memory items.
+## Usage Examples
 
-- `/memory` → shows help
-- `/memory list` → list all memory items
-- `/memory add <text>` → add a new memory item
-- `/memory clear` → clear all memory items
-- `/memory remove <index>` → remove a memory item at index
-- `/memory set <index> <text>` → update a memory item
+1. **Basic Instantiation and Usage**:
+   ```typescript
+   import Agent from '@tokenring-ai/agent';
+   import { EphemeralMemoryService } from '@tokenring-ai/memory';
 
-### /attention
+   const agent = new Agent({ services: [new EphemeralMemoryService()] });
+   const memoryService = agent.getFirstServiceByType(EphemeralMemoryService);
 
-Manage attention items by type (e.g., Focus, Goals).
+   // Add memory
+   memoryService.addMemory('I like coffee.');
 
-- `/attention` → shows help
-- `/attention list` → list all attention items by type
-- `/attention add <type> <text>` → add an item under a type
-- `/attention clear [type]` → clear all items, or only a specific type
-- `/attention remove <type> <index>` → remove an item in a type at index
-- `/attention set <type> <index> <text>` → update an item in a type
+   // Add attention
+   memoryService.pushAttentionItem('goals', 'Finish documentation');
 
-## Tools
+   // Yield in context
+   for await (const mem of memoryService.getMemories(agent)) {
+     console.log(mem.content); // "I like coffee."
+   }
+   ```
 
-Designed for agent use, but callable directly as functions too.
+2. **Using Tools in Agent**:
+   ```typescript
+   // Assuming agent is configured with tools from '@tokenring-ai/memory'
+   await agent.executeTool('memory/add-memory', { memory: 'Remember this fact.' });
+   // Tool adds to memory service internally.
+   ```
 
-- tools.addMemory
-- Description: Add a general memory string that will be presented in future chats.
-- Signature: `execute({ memory }, registry)`
-- Parameters: `{ memory: string }`
+3. **Chat Command Simulation** (via agent input):
+   ```
+   /memory add Remember to check emails
+   // Agent outputs: Added new memory: Remember to check emails
+   // Then lists updated memories.
+   ```
 
-- tools.addFocus
-- Description: Push an item into a short “Focus on these items” attention list.
-- Signature: `execute({ item }, registry)`
-- Parameters: `{ item: string }`
-- Behavior: keeps only the latest N items (currently trims to last 10 via splice semantics).
+## Configuration Options
 
-- tools.addGoal
-- Description: Add a goal to the “These are the goals that have been set” attention list.
-- Signature: `execute({ item }, registry)`
-- Parameters: `{ item: string }`
-- Behavior: trims to a recent window (currently last 20).
+- No runtime configs or env vars in the ephemeral implementation.
+- Limits in tools: Goals (20 items), Focus (10 items) enforced via `splice`.
+- For custom limits or persistence, extend `EphemeralMemoryService` and override methods.
 
-## Basic usage
+## API Reference
 
-Register a memory service (typically the ephemeral one) into your Registry alongside ChatService.
+- **Classes**:
+  - `MemoryService` (abstract): See Core Components.
+  - `EphemeralMemoryService extends MemoryService`: In-memory impl.
 
-```ts
-import {ServiceRegistry} from "@tokenring-ai/registry";
-import {ChatService} from "@tokenring-ai/chat";
-import {EphemeralMemoryService} from "@tokenring-ai/memory";
+- **Exports**:
+  - `packageInfo: TokenRingPackage` - Package metadata.
+  - Tools: `{ addMemory: { name, execute, description, inputSchema } }`, similarly for goal/focus.
+  - Commands: `{ memory: { description, execute, help } }`, similarly for attention.
 
-const registry = new ServiceRegistry();
-await registry.start();
+- **Types**: Relies on `@tokenring-ai/agent/types` (e.g., `MemoryItemMessage`, `AttentionItemMessage` as `{ role: string, content: string }`).
 
-await registry.services.addServices(
-  new ChatService({personas: {/*...*/}}),
-  new EphemeralMemoryService(),
-);
+## Dependencies
 
-// Now tools/commands that require MemoryService will work:
-// - chatCommands.memory
-// - chatCommands.attention
-// - tools.addMemory / addFocus / addGoal
-```
+- `@tokenring-ai/agent@0.1.0`: Core agent framework, types, and service integration.
+- `@tokenring-ai/utility@0.1.0`: Utilities (not directly used in core, but declared).
+- `zod`: For tool input schemas (internal to tools).
 
-Consuming services can iterate the async generators to surface context back to the model:
+## Contributing/Notes
 
-```ts
-for await (const msg of memoryService.getMemories(registry)) {
-  // msg: { role: "user", content: string }
-}
-for await (const msg of memoryService.getAttentionItems(registry)) {
-  // msg content is a concise, grouped list by type
-}
-```
+- **Testing**: Run tests with `npm test` (focuses on EphemeralMemoryService).
+- **Building**: TypeScript module; compiles to JS if needed.
+- **Limitations**: Ephemeral only—no persistence across sessions. No vector search or embeddings; plain text storage. Attention formatting is basic (bulleted lists).
+- **Extending**: Implement custom backends (e.g., database) by extending `MemoryService`.
+- License: MIT. Contributions welcome via PRs to the TokenRing repo.
 
-## Notes and limitations
-
-- EphemeralMemoryService stores everything in memory and is suitable for short-lived sessions.
-- If you need persistence or advanced policies (e.g., aging, scoring, multi-session recall), implement your own
-  MemoryService subclass and register it instead of EphemeralMemoryService.
-
-## License
-
-MIT
+For issues or features, refer to the main TokenRing project.
