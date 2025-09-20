@@ -1,6 +1,6 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
-import MemoryService from "../MemoryService.ts";
+import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 /**
  * Memory tool: stores memories for future reference in the session.
@@ -11,13 +11,13 @@ export async function execute(
   {memory}: { memory?: string },
   agent: Agent
 ): Promise<string> {
-  const memoryService = agent.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
 
   if (!memory) {
     throw new Error(`[${name}] Missing memory parameter for the focus`);
   }
 
-  memoryService.addMemory(memory);
+  memoryService.addMemory(memory, agent);
 
   agent.infoLine(`[${name}] Added new memory`);
   return "Memory added";

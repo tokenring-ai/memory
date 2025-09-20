@@ -12,5 +12,4 @@ export const packageInfo: TokenRingPackage = {
   tools
 };
 
-export {default as EphemeralMemoryService} from "./EphemeralMemoryService.ts";
-export {default as MemoryService} from "./MemoryService.ts";
+export {default as ShortTermMemoryService} from "./ShortTermMemoryService.ts";

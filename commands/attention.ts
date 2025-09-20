@@ -1,11 +1,11 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import MemoryService from "../MemoryService.ts";
+import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 export const description =
   "/attention [list|add|clear|remove|set] [args...] - Manage attention items.";
 
 export async function execute(remainder: string, agent: Agent) {
-  const memoryService = agent.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {
@@ -34,7 +34,7 @@ export async function execute(remainder: string, agent: Agent) {
         return;
       }
 
-      memoryService.pushAttentionItem(type, itemText);
+      memoryService.pushAttentionItem(type, itemText, agent);
       agent.infoLine(`Added new ${type} attention item: ${itemText}`);
       break;
     }
@@ -42,13 +42,13 @@ export async function execute(remainder: string, agent: Agent) {
     case "clear": {
       const type = args[0];
       if (type) {
-        memoryService.clearAttentionItems(type);
+        memoryService.clearAttentionItems(type, agent);
         agent.infoLine(`Cleared all attention items of type: ${type}`);
       } else {
         // Clear all types
         for await (const item of memoryService.getAttentionItems(agent)) {
           const types = String(item.content).split("\n")[0]; // First line contains the type
-          memoryService.clearAttentionItems(types);
+          memoryService.clearAttentionItems(types, agent);
         }
         agent.infoLine("Cleared all attention items");
       }
@@ -66,7 +66,7 @@ export async function execute(remainder: string, agent: Agent) {
         return;
       }
 
-      memoryService.spliceAttentionItems(type, index, 1);
+      memoryService.spliceAttentionItems(type, index, 1, agent);
       agent.infoLine(
         `Removed ${type} attention item at index ${index}`,
       );
@@ -85,7 +85,7 @@ export async function execute(remainder: string, agent: Agent) {
         return;
       }
 
-      memoryService.spliceAttentionItems(type, index, 1, newText);
+      memoryService.spliceAttentionItems(type, index, 1, agent, newText);
       agent.infoLine(
         `Updated ${type} attention item at index ${index}`,
       );

@@ -1,11 +1,11 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import MemoryService from "../MemoryService.ts";
+import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 export const description =
   "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
 
 export async function execute(remainder: string, agent: Agent) {
-  const memoryService = agent.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {
@@ -29,13 +29,13 @@ export async function execute(remainder: string, agent: Agent) {
         agent.errorLine("Please provide text for the memory item");
         return;
       }
-      memoryService.addMemory(memoryText);
+      memoryService.addMemory(memoryText, agent);
       agent.infoLine(`Added new memory: ${memoryText}`);
       break;
     }
 
     case "clear": {
-      memoryService.clearMemory();
+      memoryService.clearMemory(agent);
       agent.infoLine("Cleared all memory items");
       break;
     }
@@ -46,7 +46,7 @@ export async function execute(remainder: string, agent: Agent) {
         agent.errorLine("Please provide a valid index number");
         return;
       }
-      memoryService.spliceMemory(index, 1);
+      memoryService.spliceMemory(index, 1, agent);
       agent.infoLine(`Removed memory item at index ${index}`);
       break;
     }
@@ -62,7 +62,7 @@ export async function execute(remainder: string, agent: Agent) {
         agent.errorLine("Please provide text for the memory item");
         return;
       }
-      memoryService.spliceMemory(index, 1, newText)
+      memoryService.spliceMemory(index, 1, agent, newText);
       agent.infoLine(`Updated memory item at index ${index}`);
       break;
     }

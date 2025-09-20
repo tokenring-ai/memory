@@ -1,13 +1,13 @@
 import {beforeEach, describe, expect, it} from "vitest";
-import EphemeralMemoryService from "../EphemeralMemoryService.ts";
+import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
-describe("EphemeralMemoryService", () => {
-  let memoryService: EphemeralMemoryService;
+describe("MemoryService", () => {
+  let memoryService: ShortTermMemoryService;
   let registry = new Registry();
 
   beforeEach(() => {
     // Create a fresh instance for each test
-    memoryService = new EphemeralMemoryService();
+    memoryService = new ShortTermMemoryService();
   });
 
   // Test 1: Initialize with empty memories

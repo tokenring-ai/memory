@@ -1,6 +1,6 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {z} from "zod";
-import MemoryService from "../MemoryService.ts";
+import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 /**
  * Focus tool: adds items to the current focus list.
@@ -11,16 +11,16 @@ export async function execute(
   {item}: { item?: string },
   agent: Agent
 ): Promise<string> {
-  const memoryService = agent.requireFirstServiceByType(MemoryService);
+  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
 
   if (!item) {
     throw new Error(`[${name}] Missing item parameter for the focus`);
   }
 
   const type = "Focus on these items";
-  memoryService.pushAttentionItem(type, item);
+  memoryService.pushAttentionItem(type, item, agent);
   // keep last 10 (remove everything before the last 10)
-  memoryService.spliceAttentionItems(type, -10);
+  memoryService.spliceAttentionItems(type, -10, 0, agent);
 
   agent.infoLine(`[${name}] Added to focus`);
   return `Added to focus`;
