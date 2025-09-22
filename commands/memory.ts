@@ -5,7 +5,7 @@ export const description =
   "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
 
 export async function execute(remainder: string, agent: Agent) {
-  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
+  const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {

@@ -5,16 +5,16 @@ import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 /**
  * Memory tool: stores memories for future reference in the session.
  */
-export const name = "memory/add-memory";
+export const name = "memory/add";
 
 export async function execute(
   {memory}: { memory?: string },
   agent: Agent
 ): Promise<string> {
-  const memoryService = agent.requireFirstServiceByType(ShortTermMemoryService);
+  const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   if (!memory) {
-    throw new Error(`[${name}] Missing memory parameter for the focus`);
+    throw new Error(`[${name}] Missing parameter: memory`);
   }
 
   memoryService.addMemory(memory, agent);

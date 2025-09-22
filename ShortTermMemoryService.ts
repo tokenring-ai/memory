@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {AttentionItemMessage, MemoryItemMessage, TokenRingService} from "@tokenring-ai/agent/types";
+import {ContextItem, TokenRingService} from "@tokenring-ai/agent/types";
 import {MemoryState} from "./state/memoryState.ts";
 
 export default class ShortTermMemoryService implements TokenRingService {
@@ -28,61 +28,18 @@ export default class ShortTermMemoryService implements TokenRingService {
     });
   }
 
-  pushAttentionItem(type: string, item: string, agent: Agent): void {
-    agent.mutateState(MemoryState, (state: MemoryState) => {
-      (state.attentionItems[type] ??= []).push(item);
-    });
-  }
-
-  unshiftAttentionItem(type: string, item: string, agent: Agent): void {
-    agent.mutateState(MemoryState, (state: MemoryState) => {
-      (state.attentionItems[type] ??= []).unshift(item);
-    });
-  }
-
-  clearAttentionItems(type: string, agent: Agent): void {
-    agent.mutateState(MemoryState, (state: MemoryState) => {
-      delete state.attentionItems[type];
-    });
-  }
-
-  spliceAttentionItems(type: string, index: number, count: number, agent: Agent, ...items: string[]): void {
-    agent.mutateState(MemoryState, (state: MemoryState) => {
-      (state.attentionItems[type] ??= []).splice(index, count, ...items);
-    });
-  }
 
   /**
    * Asynchronously yields memories
    */
-  async* getMemories(agent: Agent): AsyncGenerator<MemoryItemMessage> {
+  async* getContextItems(agent: Agent): AsyncGenerator<ContextItem> {
     const state = agent.getState(MemoryState);
     for (const memory of state.memories ?? []) {
       yield {
+        position: "afterPriorMessages",
         role: "user",
         content: memory
       };
-    }
-  }
-
-  /**
-   * Asynchronously yields attention items
-   */
-  async* getAttentionItems(agent: Agent): AsyncGenerator<AttentionItemMessage> {
-    const state = agent.getState(MemoryState);
-    const message: string[] = [];
-    for (const type in state.attentionItems) {
-      const items = state.attentionItems[type];
-      if (items.length > 0) {
-        message.push(`${type}`);
-        for (const item of items) {
-          message.push(`- ${item}`);
-        }
-      }
-    }
-
-    if (message.length > 0) {
-      yield {role: "user", content: message.join("\n")};
     }
   }
 }

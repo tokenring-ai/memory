@@ -30,7 +30,7 @@ describe("MemoryService", () => {
 
     // Test the generator function
     const memories: { role: string; content: string }[] = [];
-    for await (const memory of memoryService.getMemories(agent)) {
+    for await (const memory of memoryService.getContextItems(agent)) {
       memories.push(memory);
     }
 
