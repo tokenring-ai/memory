@@ -107,6 +107,33 @@ Slash commands for interactive management:
 
 These use `agent.infoLine`/`errorLine` for output and list items via generators.
 
+## Global Scripting Functions
+
+When `@tokenring-ai/scripting` is available, the memory package registers native functions:
+
+- **addMemory(memory)**: Adds a memory to short-term storage.
+  ```bash
+  /var $result = addMemory("Remember this important fact")
+  /call addMemory("User prefers dark mode")
+  ```
+
+- **clearMemory()**: Clears all memories.
+  ```bash
+  /var $result = clearMemory()
+  /call clearMemory()
+  ```
+
+These functions integrate with the scripting system:
+
+```bash
+# Store context during a conversation
+/var $fact = "User is interested in AI research"
+/call addMemory($fact)
+
+# Clear when starting a new topic
+/call clearMemory()
+```
+
 ## Usage Examples
 
 1. **Basic Instantiation and Usage**:
