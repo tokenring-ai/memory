@@ -7,10 +7,10 @@ import packageJSON from "./package.json" with {type: "json"};
 import ShortTermMemoryService from "./ShortTermMemoryService.js";
 import * as tools from "./tools.ts";
 
-export const packageInfo: TokenRingPackage = {
-	name: packageJSON.name,
-	version: packageJSON.version,
-	description: packageJSON.description,
+export default {
+  name: packageJSON.name,
+  version: packageJSON.version,
+  description: packageJSON.description,
   install(agentTeam: AgentTeam) {
     agentTeam.services.waitForItemByType(ScriptingService).then((scriptingService: ScriptingService) => {
       scriptingService.registerFunction("addMemory", {
@@ -33,10 +33,10 @@ export const packageInfo: TokenRingPackage = {
         }
       );
     });
-    agentTeam.addTools(packageInfo, tools)
+    agentTeam.addTools(packageJSON.name, tools)
     agentTeam.addChatCommands(chatCommands);
     agentTeam.addServices(new ShortTermMemoryService());
   },
-};
+} as TokenRingPackage;
 
-export { default as ShortTermMemoryService } from "./ShortTermMemoryService.ts";
+export {default as ShortTermMemoryService} from "./ShortTermMemoryService.ts";
