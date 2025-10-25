@@ -1,5 +1,5 @@
-import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 import type {ResetWhat} from "@tokenring-ai/agent/AgentEvents";
+import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 
 export class MemoryState implements AgentStateSlice {
 	name = "MemoryState";
@@ -11,7 +11,7 @@ export class MemoryState implements AgentStateSlice {
 	}
 
 	reset(what: ResetWhat[]): void {
-		if (what.includes("chat")) {
+    if (what.includes("chat") || what.includes("memory")) {
 			this.memories = [];
 		}
 	}
@@ -25,4 +25,11 @@ export class MemoryState implements AgentStateSlice {
 	deserialize(data: any): void {
 		this.memories = data.memories ? [...data.memories] : [];
 	}
+
+  show(): string[] {
+    return [
+      `Memories: ${this.memories.length}`,
+      ...this.memories.map((m, i) => `  [${i + 1}] ${m}`)
+    ];
+  }
 }
