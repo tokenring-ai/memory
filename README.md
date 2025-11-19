@@ -2,9 +2,13 @@
 
 ## Overview
 
-The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions without persistent storage. The package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools and chat commands.
+The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework.
+It enables agents to store and recall simple facts or information during a session, maintaining context across
+interactions without persistent storage. The package uses an agent state slice for memory storage and integrates with
+the TokenRing agent system via tools and chat commands.
 
 Key features:
+
 - Store and retrieve memories as strings.
 - Memories are injected into agent context for all future interactions.
 - Session-scoped storage—memories clear on chat reset.
@@ -26,7 +30,8 @@ import { ShortTermMemoryService } from '@tokenring-ai/memory';
 const agent = new Agent({ services: [new ShortTermMemoryService()] });
 ```
 
-The package is automatically installed and registered when the TokenRing application initializes. No additional configuration is required.
+The package is automatically installed and registered when the TokenRing application initializes. No additional
+configuration is required.
 
 ## Package Structure
 
@@ -36,9 +41,9 @@ The package is organized as follows:
 - **ShortTermMemoryService.ts**: Service implementation providing memory management and state initialization.
 - **state/memoryState.ts**: Agent state slice for storing memories with serialization/deserialization support.
 - **tools.ts**: Exports agent tools (memory/add).
-  - **tools/addMemory.ts**: Tool to add a memory item to the agent's memory state.
+ - **tools/addMemory.ts**: Tool to add a memory item to the agent's memory state.
 - **chatCommands.ts**: Exports chat commands (/memory).
-  - **commands/memory.ts**: Commands for managing memories (list, add, clear, remove, set).
+ - **commands/memory.ts**: Commands for managing memories (list, add, clear, remove, set).
 - **package.json**: Package metadata and exports.
 - **test/**: Unit tests.
 - **LICENSE**: MIT license.
@@ -50,47 +55,52 @@ The package is organized as follows:
 The primary service class implementing memory management for agents.
 
 - **Properties**:
-  - `name: string` - Service name: "ShortTermMemoryService".
-  - `description: string` - "Provides Short Term Memory functionality".
+ - `name: string` - Service name: "ShortTermMemoryService".
+ - `description: string` - "Provides Short Term Memory functionality".
 
 - **Key Methods**:
-  - `async attach(agent: Agent): Promise<void>` - Initializes the `MemoryState` on agent attachment.
-  - `addMemory(memory: string, agent: Agent): void` - Adds a memory string to the agent's memory state.
-  - `clearMemory(agent: Agent): void` - Clears all memories from the agent's state.
-  - `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` - Modifies the memory array (remove/replace/insert).
-  - `async *getContextItems(agent: Agent): AsyncGenerator<ContextItem>` - Yields memories as context items to be injected into agent context.
+ - `async attach(agent: Agent): Promise<void>` - Initializes the `MemoryState` on agent attachment.
+ - `addMemory(memory: string, agent: Agent): void` - Adds a memory string to the agent's memory state.
+ - `clearMemory(agent: Agent): void` - Clears all memories from the agent's state.
+ - `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` - Modifies the memory array (
+   remove/replace/insert).
+ - `async *getContextItems(agent: Agent): AsyncGenerator<ContextItem>` - Yields memories as context items to be injected
+   into agent context.
 
 ### MemoryState
 
 An agent state slice for storing memories with serialization support.
 
 - **Properties**:
-  - `name: string` - State slice name: "MemoryState".
-  - `memories: string[]` - Array of memory strings.
-  - `persistToSubAgents: boolean` - Set to `true`; memories persist to sub-agents automatically.
+ - `name: string` - State slice name: "MemoryState".
+ - `memories: string[]` - Array of memory strings.
+ - `persistToSubAgents: boolean` - Set to `true`; memories persist to sub-agents automatically.
 
 - **Key Methods**:
-  - `reset(what: ResetWhat[]): void` - Clears memories when chat resets.
-  - `serialize(): object` - Serializes memories for persistence.
-  - `deserialize(data: any): void` - Deserializes memories from stored data.
+ - `reset(what: ResetWhat[]): void` - Clears memories when chat resets.
+ - `serialize(): object` - Serializes memories for persistence.
+ - `deserialize(data: any): void` - Deserializes memories from stored data.
 
 Memories are stored as context items positioned after prior messages in the agent context.
 
 ### Tools
 
 Agent tools for programmatic addition:
-- `memory/add`: Adds a memory item via `addMemory`. Input: `{ memory: string }`. Description: "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind."
+
+- `memory/add`: Adds a memory item via `addMemory`. Input: `{ memory: string }`. Description: "Add an item to the memory
+  list. The item will be presented in future chats to help keep important information in the back of your mind."
 
 ### Chat Commands
 
 Slash commands for interactive management:
+
 - `/memory [op] [args]` - Memory management command.
-  - No arguments: Shows help.
-  - `list` - Shows all memory items with indices.
-  - `add <text>` - Adds a new memory item.
-  - `clear` - Clears all memory items.
-  - `remove <index>` - Removes a memory item at the specified index.
-  - `set <index> <text>` - Updates a memory item at the specified index.
+ - No arguments: Shows help.
+ - `list` - Shows all memory items with indices.
+ - `add <text>` - Adds a new memory item.
+ - `clear` - Clears all memory items.
+ - `remove <index>` - Removes a memory item at the specified index.
+ - `set <index> <text>` - Updates a memory item at the specified index.
 
 Output is provided via `agent.infoLine()` and `agent.errorLine()` methods.
 
@@ -173,14 +183,14 @@ These functions integrate with the scripting system:
 ## API Reference
 
 - **Classes**:
-  - `ShortTermMemoryService extends TokenRingService`: See Core Components.
-  - `MemoryState extends AgentStateSlice`: Agent state slice for memory storage.
+ - `ShortTermMemoryService extends TokenRingService`: See Core Components.
+ - `MemoryState extends AgentStateSlice`: Agent state slice for memory storage.
 
 - **Exports**:
-  - `packageInfo: TokenRingPackage` - Package metadata and installation handler.
-  - `ShortTermMemoryService` - Service class.
-  - Tools: `{ addMemory: { name, execute, description, inputSchema } }` - Tool for adding memories.
-  - Commands: `{ memory: { description, execute, help } }` - Chat command handler.
+ - `packageInfo: TokenRingPackage` - Package metadata and installation handler.
+ - `ShortTermMemoryService` - Service class.
+ - Tools: `{ addMemory: { name, execute, description, inputSchema } }` - Tool for adding memories.
+ - Commands: `{ memory: { description, execute, help } }` - Chat command handler.
 
 - **Types**: Relies on `@tokenring-ai/agent/types` (e.g., `ContextItem`, `TokenRingService`, `AgentStateSlice`).
 
@@ -188,13 +198,15 @@ These functions integrate with the scripting system:
 
 - `@tokenring-ai/agent@0.1.0`: Core agent framework, types, and service integration.
 - `@tokenring-ai/utility@0.1.0`: Utilities package.
-- `@tokenring-ai/scripting` (optional): For global scripting function registration (e.g., `addMemory()`, `clearMemory()`). Automatically integrated when available.
+- `@tokenring-ai/scripting` (optional): For global scripting function registration (e.g., `addMemory()`,
+  `clearMemory()`). Automatically integrated when available.
 
 ## Contributing/Notes
 
 - **Testing**: Run tests with `bun run test` from the project root. Tests are located in `pkg/memory/test/`.
 - **Building**: TypeScript module; builds as part of the main project via `bun run build`.
-- **Limitations**: Session-scoped only—no persistence across application restarts. No vector search or embeddings; plain text storage. Memories are simple strings with no rich formatting support.
+- **Limitations**: Session-scoped only—no persistence across application restarts. No vector search or embeddings; plain
+  text storage. Memories are simple strings with no rich formatting support.
 - **Extending**: Create a custom service by extending `TokenRingService` and implementing the required methods.
 - **License**: MIT. Contributions welcome via PRs to the TokenRing repository.
 

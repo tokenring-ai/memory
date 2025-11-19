@@ -1,16 +1,16 @@
 {
-	"name": "@tokenring-ai/memory",
-	"version": "0.1.0",
-	"description": "Memory service for tokenring-ai",
-	"dependencies": {
-		"@tokenring-ai/agent": "0.1.0",
-		"@tokenring-ai/utility": "0.1.0"
-	},
-	"exports": {
-		".": "./index.ts",
-		"./*": "./*.ts"
-	},
-	"license": "MIT",
-	"scripts": {},
-	"type": "module"
+ "name": "@tokenring-ai/memory",
+ "version": "0.1.0",
+ "description": "Memory service for tokenring-ai",
+ "dependencies": {
+  "@tokenring-ai/agent": "0.1.0",
+  "@tokenring-ai/utility": "0.1.0"
+ },
+ "exports": {
+  ".": "./index.ts",
+  "./*": "./*.ts"
+ },
+ "license": "MIT",
+ "scripts": {},
+ "type": "module"
 }
