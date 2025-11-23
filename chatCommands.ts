@@ -1,1 +1,1 @@
-export * as memory from "./commands/memory.ts";
+export {default as memory} from "./commands/memory.ts";

@@ -1,10 +1,11 @@
 import Agent from "@tokenring-ai/agent/Agent";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
-export const description =
+const description =
   "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
 
-export async function execute(remainder: string, agent: Agent) {
+async function execute(remainder: string, agent: Agent) {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   // Show help if no arguments provided
@@ -109,3 +110,9 @@ export function help() {
     "  - set <index> <text>: updates memory item at specified index",
   ];
 }
+
+export default {
+  description,
+  execute,
+  help,
+} as TokenRingAgentCommand

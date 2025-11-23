@@ -1,5 +1,7 @@
-import {AgentCommandService, AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import TokenRingApp from "@tokenring-ai/app"; 
+import {AgentCommandService} from "@tokenring-ai/agent";
 import {ChatService} from "@tokenring-ai/chat";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService.js";
 
@@ -12,8 +14,8 @@ export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(agentTeam: AgentTeam) {
-    agentTeam.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
+  install(app: TokenRingApp) {
+    app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("addMemory", {
           type: 'native',
           params: ['memory'],
@@ -34,14 +36,14 @@ export default {
         }
       );
     });
-    agentTeam.waitForService(ChatService, chatService =>
+    app.waitForService(ChatService, chatService =>
       chatService.addTools(packageJSON.name, tools)
     );
-    agentTeam.waitForService(AgentCommandService, agentCommandService =>
+    app.waitForService(AgentCommandService, agentCommandService =>
       agentCommandService.addAgentCommands(chatCommands)
     );
-    agentTeam.addServices(new ShortTermMemoryService());
+    app.addServices(new ShortTermMemoryService());
   },
-} as TokenRingPackage;
+} as TokenRingPlugin;
 
 export {default as ShortTermMemoryService} from "./ShortTermMemoryService.ts";

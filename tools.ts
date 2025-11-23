@@ -1,1 +1,1 @@
-export * as addMemory from "./tools/addMemory.ts";
+export {default as addMemory} from "./tools/addMemory.ts";
