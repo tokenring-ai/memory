@@ -99,7 +99,7 @@ async function listMemories(memoryService: any, agent: Agent) {
 }
 
 // noinspection JSUnusedGlobalSymbols
-export function help() {
+function help() {
   return [
     "/memory [list|add|clear|remove|set] [args...]",
     "  - No arguments: shows this help message",
