@@ -3,14 +3,14 @@ import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 const description =
-  "/memory [list|add|clear|remove|set] [args...] - Manage memory items.";
+  "/memory - Manage memory items.";
 
 async function execute(remainder: string, agent: Agent) {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   // Show help if no arguments provided
   if (!remainder?.trim()) {
-    help().forEach((line) => agent.infoLine(line));
+    agent.chatOutput(help);
     return;
   }
 
@@ -98,18 +98,64 @@ async function listMemories(memoryService: any, agent: Agent) {
   }
 }
 
-// noinspection JSUnusedGlobalSymbols
-function help() {
-  return [
-    "/memory [list|add|clear|remove|set] [args...]",
-    "  - No arguments: shows this help message",
-    "  - list: shows all memory items",
-    "  - add <text>: adds a new memory item",
-    "  - clear: clears all memory items",
-    "  - remove <index>: removes memory item at specified index",
-    "  - set <index> <text>: updates memory item at specified index",
-  ];
-}
+const help: string = `# MEMORY MANAGEMENT COMMAND
+
+## Usage
+
+/memory [operation] [arguments...]
+
+## Operations
+
+### list
+
+Display all stored memory items
+
+**Example:**
+/memory list
+
+### add <text>
+
+Add a new memory item
+
+**Examples:**
+/memory add Remember to buy groceries tomorrow
+/memory add Meeting notes: Discuss project timeline
+
+### clear
+
+Remove all memory items
+
+**Example:**
+/memory clear
+
+### remove <index>
+
+Remove memory item at specific index
+
+**Examples:**
+/memory remove 0
+/memory remove 3
+
+### set <index> <text>
+
+Update memory item at specific index
+
+**Examples:**
+/memory set 0 Updated meeting notes
+/memory set 2 Remember to buy groceries tomorrow
+
+## General Usage
+
+- Use /memory without arguments to show this help message
+- Memory items are displayed with their index number in brackets
+- Index numbers start from 0 (first item is [0])
+- Use the list command to see current memory items and their indices
+
+## Tips
+
+- Use descriptive text for better memory organization
+- Regularly review and clean up memory items
+- Use the list command before removing or updating items`;
 
 export default {
   description,
