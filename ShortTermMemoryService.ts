@@ -33,18 +33,4 @@ export default class ShortTermMemoryService implements TokenRingService {
       state.memories.splice(index, count, ...items);
     });
   }
-
-  /**
-   * Asynchronously yields memories
-   */
-  async* getContextItems(agent: Agent): AsyncGenerator<ContextItem> {
-    const state = agent.getState(MemoryState);
-    for (const memory of state.memories ?? []) {
-      yield {
-        position: "afterPriorMessages",
-        role: "user",
-        content: memory,
-      };
-    }
-  }
 }
