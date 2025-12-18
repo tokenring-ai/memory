@@ -47,4 +47,4 @@ export default {
     );
     app.addServices(new ShortTermMemoryService());
   },
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
