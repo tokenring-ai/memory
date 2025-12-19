@@ -1,10 +1,10 @@
+import {Agent} from "@tokenring-ai/agent";
 import type {ResetWhat} from "@tokenring-ai/agent/AgentEvents";
 import type {AgentStateSlice} from "@tokenring-ai/agent/types";
 
 export class MemoryState implements AgentStateSlice {
   name = "MemoryState";
   memories: string[] = [];
-  persistToSubAgents = true;
 
   constructor({memories = []}: { memories?: string[] } = {}) {
     this.memories = [...memories];
@@ -15,6 +15,11 @@ export class MemoryState implements AgentStateSlice {
       this.memories = [];
     }
   }
+
+  transferStateFromParent(parent: Agent): void {
+    this.deserialize(parent.getState(MemoryState).serialize());
+  }
+
 
   serialize(): object {
     return {
