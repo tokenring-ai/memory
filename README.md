@@ -8,10 +8,11 @@ The `@tokenring-ai/memory` package provides short-term memory management for AI 
 
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
 - **Context Integration**: Memories are automatically injected into agent context for all future interactions
-- **Session Management**: Session-scoped storage—memories clear on chat reset
+- **Session Management**: Session-scoped storage—memories clear on chat or memory resets
 - **Sub-agent Persistence**: Memories automatically persist to sub-agents
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
 - **State Management**: Built-in state serialization/deserialization for persistence
+- **Context Injection**: Automatic injection of memories into agent context via context handlers
 
 This package is designed for use in AI agent applications, enhancing context awareness during conversations or tasks.
 
@@ -20,7 +21,7 @@ This package is designed for use in AI agent applications, enhancing context awa
 This package is part of the TokenRing AI ecosystem. It's automatically installed with the main TokenRing project.
 
 ```bash
-npm install @tokenring-ai/memory
+bun install @tokenring-ai/memory
 ```
 
 ## Package Structure
@@ -41,8 +42,6 @@ pkg/memory/
 │   └── shortTermMemory.ts   # Context handler for injecting memories into agent context
 ├── plugin.ts                # Plugin for automatic service registration
 ├── package.json             # Package metadata and dependencies
-├── test/
-│   └── MemoryService.test.ts # Unit tests
 └── README.md                # This documentation
 ```
 
@@ -81,7 +80,7 @@ Memories are stored as context items positioned after prior messages in the agen
 
 ### Context Handler
 
-The `getContextItems` context handler automatically injects memories into agent context:
+The `shortTermMemory` context handler automatically injects memories into agent context:
 
 ```typescript
 export default async function * getContextItems(
@@ -156,7 +155,7 @@ Adds a memory to short-term storage.
 /call addMemory("User prefers dark mode")
 ```
 
-**Returns:** `"Added memory: <first 50 chars of memory>..."`
+**Returns:** `Added memory: <first 50 chars of memory>...`
 
 ### clearMemory(): string
 
@@ -167,7 +166,7 @@ Clears all memories.
 /call clearMemory()
 ```
 
-**Returns:** `"Memory cleared"`
+**Returns:** `Memory cleared`
 
 **Usage Examples:**
 ```bash
@@ -305,7 +304,7 @@ const subAgent = agent.createSubAgent();
 
 ### Context Handlers
 
-- **getContextItems**: Async generator that yields memories as context items
+- **shortTermMemory**: Async generator that yields memories as context items
   - Parameters: `input`, `chatConfig`, `params`, `agent`
   - Yields: `ContextItem[]` with memories
 
@@ -340,7 +339,7 @@ const subAgent = agent.createSubAgent();
 
 ### Testing
 
-Run tests with `npm test` from the project root. Tests cover:
+Run tests with `bun test` from the project root. Tests cover:
 - Memory service initialization
 - Memory addition and retrieval
 - Memory clearing
@@ -350,7 +349,7 @@ Run tests with `npm test` from the project root. Tests cover:
 
 ### Building
 
-TypeScript module; builds as part of the main project via `npm run build` from the project root.
+TypeScript module; builds as part of the main project via `bun run build` from the project root.
 
 ### Package Version
 
