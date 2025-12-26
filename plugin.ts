@@ -1,9 +1,9 @@
-import TokenRingApp from "@tokenring-ai/app"; 
 import {AgentCommandService} from "@tokenring-ai/agent";
-import {ChatService} from "@tokenring-ai/chat";
 import {TokenRingPlugin} from "@tokenring-ai/app";
+import {ChatService} from "@tokenring-ai/chat";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
+import {z} from "zod";
 
 import chatCommands from "./chatCommands.ts";
 import contextHandlers from "./contextHandlers.ts";
@@ -11,12 +11,13 @@ import packageJSON from "./package.json" with {type: "json"};
 import ShortTermMemoryService from "./ShortTermMemoryService.js";
 import tools from "./tools.ts";
 
+const packageConfigSchema = z.object({});
 
 export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app: TokenRingApp) {
+  install(app, config) {
     app.waitForService(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("addMemory", {
           type: 'native',
@@ -47,4 +48,5 @@ export default {
     );
     app.addServices(new ShortTermMemoryService());
   },
-} satisfies TokenRingPlugin;
+  config: packageConfigSchema
+} satisfies TokenRingPlugin<typeof packageConfigSchema>;
