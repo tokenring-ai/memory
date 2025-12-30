@@ -1,5 +1,5 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {ChatConfig, ContextItem} from "@tokenring-ai/chat/types";
+import {ChatConfig, ContextItem} from "@tokenring-ai/chat/schema";
 import {MemoryState} from "../state/memoryState.ts";
 
 /**

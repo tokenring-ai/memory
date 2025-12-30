@@ -1,4 +1,4 @@
-import {ContextHandler} from "@tokenring-ai/chat/types";
+import {ContextHandler} from "@tokenring-ai/chat/schema";
 import shortTermMemory from "./contextHandlers/shortTermMemory.ts";
 
 export default {
