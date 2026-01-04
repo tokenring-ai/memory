@@ -6,7 +6,7 @@ export default class ShortTermMemoryService implements TokenRingService {
   name = "ShortTermMemoryService";
   description = "Provides Short Term Memory functionality";
 
-  async attach(agent: Agent): Promise<void> {
+  attach(agent: Agent): void {
     agent.initializeState(MemoryState, {});
   }
 
