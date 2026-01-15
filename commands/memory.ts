@@ -27,49 +27,49 @@ async function execute(remainder: string, agent: Agent) {
     case "add": {
       const memoryText = args.join(" ");
       if (!memoryText) {
-        agent.errorLine("Please provide text for the memory item");
+        agent.errorMessage("Please provide text for the memory item");
         return;
       }
       memoryService.addMemory(memoryText, agent);
-      agent.infoLine(`Added new memory: ${memoryText}`);
+      agent.infoMessage(`Added new memory: ${memoryText}`);
       break;
     }
 
     case "clear": {
       memoryService.clearMemory(agent);
-      agent.infoLine("Cleared all memory items");
+      agent.infoMessage("Cleared all memory items");
       break;
     }
 
     case "remove": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        agent.errorLine("Please provide a valid index number");
+        agent.errorMessage("Please provide a valid index number");
         return;
       }
       memoryService.spliceMemory(index, 1, agent);
-      agent.infoLine(`Removed memory item at index ${index}`);
+      agent.infoMessage(`Removed memory item at index ${index}`);
       break;
     }
 
     case "set": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        agent.errorLine("Please provide a valid index number");
+        agent.errorMessage("Please provide a valid index number");
         return;
       }
       const newText = args.slice(1).join(" ");
       if (!newText) {
-        agent.errorLine("Please provide text for the memory item");
+        agent.errorMessage("Please provide text for the memory item");
         return;
       }
       memoryService.spliceMemory(index, 1, agent, newText);
-      agent.infoLine(`Updated memory item at index ${index}`);
+      agent.infoMessage(`Updated memory item at index ${index}`);
       break;
     }
 
     default:
-      agent.errorLine("Unknown operation. ");
+      agent.errorMessage("Unknown operation. ");
       // Intentionally not calling help() bound to this
       return;
   }
@@ -80,22 +80,25 @@ async function execute(remainder: string, agent: Agent) {
 
 async function listMemories(memoryService: any, agent: Agent) {
   let index = 0;
+  const lines: string[] = [];
 
   for await (const memory of memoryService.getMemories("", agent)) {
     if (index === 0) {
-      agent.infoLine("Memory items:");
+      lines.push("Memory items:");
     }
-    const lines = String(memory.content ?? "").split("\n");
-    agent.infoLine(`[${index}] ${lines[0]}`);
-    for (let i = 1; i < lines.length; i++) {
-      agent.infoLine(`[${index}]  ${lines[i]}`);
+    const memoryLines = String(memory.content ?? "").split("\n");
+    lines.push(`[${index}] ${memoryLines[0]}`);
+    for (let i = 1; i < memoryLines.length; i++) {
+      lines.push(`[${index}]  ${memoryLines[i]}`);
     }
     index++;
   }
 
   if (index === 0) {
-    agent.infoLine("No memory items stored");
+    lines.push("No memory items stored");
   }
+
+  agent.infoMessage(lines.join("\n"));
 }
 
 const help: string = `# MEMORY MANAGEMENT COMMAND

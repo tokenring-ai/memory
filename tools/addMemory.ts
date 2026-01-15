@@ -20,7 +20,7 @@ async function execute(
 
   memoryService.addMemory(memory, agent);
 
-  agent.infoLine(`[${name}] Added new memory`);
+  agent.infoMessage(`[${name}] Added new memory`);
   return "Memory added";
 }
 
