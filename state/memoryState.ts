@@ -1,9 +1,15 @@
 import {Agent} from "@tokenring-ai/agent";
 import type {ResetWhat} from "@tokenring-ai/agent/AgentEvents";
 import type {AgentStateSlice} from "@tokenring-ai/agent/types";
+import {z} from "zod";
 
-export class MemoryState implements AgentStateSlice {
+const serializationSchema = z.object({
+  memories: z.array(z.string())
+});
+
+export class MemoryState implements AgentStateSlice<typeof serializationSchema> {
   name = "MemoryState";
+  serializationSchema = serializationSchema;
   memories: string[] = [];
 
   constructor({memories = []}: { memories?: string[] } = {}) {
@@ -17,17 +23,18 @@ export class MemoryState implements AgentStateSlice {
   }
 
   transferStateFromParent(parent: Agent): void {
-    this.deserialize(parent.getState(MemoryState).serialize());
+    const parentState = parent.getState(MemoryState);
+    this.deserialize(parentState.serialize());
   }
 
 
-  serialize(): object {
+  serialize(): z.output<typeof serializationSchema> {
     return {
       memories: this.memories,
     };
   }
 
-  deserialize(data: any): void {
+  deserialize(data: z.output<typeof serializationSchema>): void {
     this.memories = data.memories ? [...data.memories] : [];
   }
 
