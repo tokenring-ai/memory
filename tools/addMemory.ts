@@ -7,6 +7,7 @@ import ShortTermMemoryService from "../ShortTermMemoryService.ts";
  * Memory tool: stores memories for future reference in the session.
  */
 const name = "memory_add";
+const displayName = "Memory/addMemory";
 
 async function execute(
   {memory}: z.infer<typeof inputSchema>,
@@ -32,5 +33,5 @@ const inputSchema = z.object({
 });
 
 export default {
-  name, description, inputSchema, execute,
+  name, displayName, description, inputSchema, execute,
 } satisfies TokenRingToolDefinition<typeof inputSchema>;
