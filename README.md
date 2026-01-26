@@ -7,7 +7,7 @@ The `@tokenring-ai/memory` package provides short-term memory management for AI 
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
 - **Context Integration**: Memories are automatically injected into agent context for all future interactions
 - **Session Management**: Session-scoped storage—memories clear on chat or memory resets
-- **Sub-agent Persistence**: Memories automatically persist to sub-agents
+- **Sub-agent Persistence**: Memories can be transferred from parent agents to sub-agents
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
 - **State Management**: Built-in state serialization/deserialization for persistence
 - **Context Injection**: Automatic injection of memories into agent context via context handlers
@@ -31,54 +31,7 @@ import ShortTermMemoryService from "@tokenring-ai/memory/ShortTermMemoryService"
 const service = new ShortTermMemoryService();
 ```
 
-**Properties:**
-- `name: string = "ShortTermMemoryService"` — Service identifier
-- `description: string = "Provides Short Term Memory functionality"` — Service description
-
-**Methods:**
-- `attach(agent: Agent): Promise<void>` — Initializes the `MemoryState` on agent attachment
-- `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state
-- `clearMemory(agent: Agent): void` — Clears all memories from the agent's state
-- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (remove/replace/insert)
-
-### MemoryState
-
-An agent state slice for storing memories with serialization support.
-
-```typescript
-import { MemoryState } from "@tokenring-ai/memory/state/memoryState";
-
-const state = new MemoryState({ memories: [] });
-```
-
-**Properties:**
-- `name: string = "MemoryState"` — State slice name
-- `memories: string[]` — Array of memory strings
-
-**Methods:**
-- `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories
-- `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets
-- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
-- `serialize(): object` — Serializes memories for persistence
-- `deserialize(data: any): void` — Deserializes memories from stored data
-- `show(): string[]` — Returns formatted string representation of memories
-
-### Context Handler
-
-The `shortTermMemory` context handler automatically injects memories into agent context:
-
-```typescript
-import shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";
-
-export default async function * getContextItems(
-  input: string,
-  chatConfig: ChatConfig,
-  params: {},
-  agent: Agent
-): AsyncGenerator<ContextItem>
-```
-
-This yields memories as `ContextItem` objects with role "user" and memory content, making them available to the agent in all future interactions.
+**Properties:**\n- `name: string = "ShortTermMemoryService"` — Service identifier\n- `description: string = "Provides Short Term Memory functionality"` — Service description\n\n**Methods:**\n- `attach(agent: Agent): void` — Initializes the `MemoryState` on agent attachment\n- `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state\n- `clearMemory(agent: Agent): void` — Clears all memories from the agent's state\n- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (remove/replace/insert)\n\n### MemoryState\n\nAn agent state slice for storing memories with serialization support.\n\n```typescript\nimport { MemoryState } from "@tokenring-ai/memory/state/memoryState";\n\nconst state = new MemoryState({ memories: [] });\n```\n\n**Properties:**\n- `name: string = "MemoryState"` — State slice name\n- `memories: string[]` — Array of memory strings\n\n**Methods:**\n- `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories\n- `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets\n- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent\n- `serialize(): object` — Serializes memories for persistence\n- `deserialize(data: any): void` — Deserializes memories from stored data\n- `show(): string[]` — Returns formatted string representation of memories\n\n### Context Handler\n\nThe `shortTermMemory` context handler automatically injects memories into agent context:\n\n```typescript\nimport shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";\n\nexport default async function * getContextItems(\n  input: string,\n  chatConfig: ChatConfig,\n  params: {},\n  agent: Agent\n): AsyncGenerator<ContextItem>\n```\n\nThis yields memories as `ContextItem` objects with role "user" and memory content, making them available to the agent in all future interactions.
 
 ## Usage Examples
 
@@ -118,8 +71,8 @@ When the agent processes a request, memories are automatically injected into the
 
 ```typescript
 // Tools can be executed programmatically
-await agent.executeTool('memory_add', { 
-  memory: 'Meeting scheduled for 2 PM tomorrow' 
+await agent.executeTool('memory_add', {
+  memory: 'Meeting scheduled for 2 PM tomorrow'
 });
 ```
 
@@ -129,7 +82,7 @@ await agent.executeTool('memory_add', {
 # Agent input simulation
 /memory add Remember to review the quarterly report
 /memory list
-# Output: 
+# Output:
 # Memory items:
 # [0] Remember to review the quarterly report
 ```
@@ -138,18 +91,24 @@ await agent.executeTool('memory_add', {
 
 ```typescript
 // Memories persist across state serialization
-const checkpoint = agent.createCheckpoint();
+const state = agent.getState(MemoryState);
+const serializedData = state.serialize();
 // ... later ...
-agent.restoreFromCheckpoint(checkpoint);
-// Memories are restored
+const restoredState = new MemoryState();
+restoredState.deserialize(serializedData);
 ```
 
 ### Sub-agent Integration
 
 ```typescript
-// Memories automatically transfer to sub-agents
+// Memories can be transferred to sub-agents
+const parentAgent = new Agent({ services: [new ShortTermMemoryService()] });
+parentAgent.addState(new MemoryState({ memories: ['Important fact'] }));
+
 const subAgent = agent.createSubAgent();
-// Sub-agent has access to parent's memories
+const subState = subAgent.getState(MemoryState);
+subState.transferStateFromParent(parentAgent);
+// Sub-agent now has access to parent's memories
 ```
 
 ### Scripting Functions
@@ -176,7 +135,7 @@ const packageConfigSchema = z.object({});
 
 | Method | Description | Parameters | Returns |
 |--------|-------------|------------|---------|
-| `attach(agent)` | Initialize memory state | `agent: Agent` | `Promise<void>` |
+| `attach(agent)` | Initialize memory state | `agent: Agent` | `void` |
 | `addMemory(memory, agent)` | Add a memory string | `memory: string`, `agent: Agent` | `void` |
 | `clearMemory(agent)` | Clear all memories | `agent: Agent` | `void` |
 | `spliceMemory(index, count, agent, ...items)` | Modify memory array | `index: number`, `count: number`, `agent: Agent`, `...items: string[]` | `void` |
@@ -199,6 +158,7 @@ const packageConfigSchema = z.object({});
 Adds a memory item via the memory service.
 
 **Input Schema:**
+
 ```typescript
 import { z } from "zod";
 
@@ -210,9 +170,10 @@ const inputSchema = z.object({
 **Description:** "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind."
 
 **Example:**
+
 ```typescript
-await agent.executeTool('memory_add', { 
-  memory: 'User prefers detailed technical explanations' 
+await agent.executeTool('memory_add', {
+  memory: 'User prefers detailed technical explanations'
 });
 ```
 
@@ -235,6 +196,7 @@ The `/memory` command provides interactive memory management through chat.
 | `set <index> <text>` | Updates memory item at specified index | `/memory set 1 Updated meeting notes` |
 
 **Examples:**
+
 ```bash
 /memory add Remember to check emails tomorrow
 /memory list
@@ -253,6 +215,7 @@ The package registers global scripting functions when the ScriptingService is av
 | `clearMemory()` | Clear all memories | None | `string` confirmation |
 
 **Example:**
+
 ```typescript
 await scriptingService.eval('addMemory("User preference: dark mode")');
 await scriptingService.eval('clearMemory()');
@@ -296,10 +259,8 @@ const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 // Add memory
 memoryService.addMemory('Important fact', agent);
 
-// List all memories (via getMemories iterator)
-for await (const memory of memoryService.getMemories('', agent)) {
-  console.log(memory.content);
-}
+// List all memories (via chat command)
+memoryService.clearMemory(agent);
 ```
 
 ## Development
