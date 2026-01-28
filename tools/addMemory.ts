@@ -10,7 +10,7 @@ const name = "memory_add";
 const displayName = "Memory/addMemory";
 
 async function execute(
-  {memory}: z.infer<typeof inputSchema>,
+  {memory}: z.output<typeof inputSchema>,
   agent: Agent,
 ): Promise<string> {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
