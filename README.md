@@ -31,7 +31,54 @@ import ShortTermMemoryService from "@tokenring-ai/memory/ShortTermMemoryService"
 const service = new ShortTermMemoryService();
 ```
 
-**Properties:**\n- `name: string = "ShortTermMemoryService"` — Service identifier\n- `description: string = "Provides Short Term Memory functionality"` — Service description\n\n**Methods:**\n- `attach(agent: Agent): void` — Initializes the `MemoryState` on agent attachment\n- `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state\n- `clearMemory(agent: Agent): void` — Clears all memories from the agent's state\n- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (remove/replace/insert)\n\n### MemoryState\n\nAn agent state slice for storing memories with serialization support.\n\n```typescript\nimport { MemoryState } from "@tokenring-ai/memory/state/memoryState";\n\nconst state = new MemoryState({ memories: [] });\n```\n\n**Properties:**\n- `name: string = "MemoryState"` — State slice name\n- `memories: string[]` — Array of memory strings\n\n**Methods:**\n- `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories\n- `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets\n- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent\n- `serialize(): object` — Serializes memories for persistence\n- `deserialize(data: any): void` — Deserializes memories from stored data\n- `show(): string[]` — Returns formatted string representation of memories\n\n### Context Handler\n\nThe `shortTermMemory` context handler automatically injects memories into agent context:\n\n```typescript\nimport shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";\n\nexport default async function * getContextItems(\n  input: string,\n  chatConfig: ChatConfig,\n  params: {},\n  agent: Agent\n): AsyncGenerator<ContextItem>\n```\n\nThis yields memories as `ContextItem` objects with role "user" and memory content, making them available to the agent in all future interactions.
+**Properties:**
+- `name: string = "ShortTermMemoryService"` — Service identifier
+- `description: string = "Provides Short Term Memory functionality"` — Service description
+
+**Methods:**
+- `attach(agent: Agent): void` — Initializes the `MemoryState` on agent attachment
+- `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state
+- `clearMemory(agent: Agent): void` — Clears all memories from the agent's state
+- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (remove/replace/insert)
+
+### MemoryState
+
+An agent state slice for storing memories with serialization support.
+
+```typescript
+import { MemoryState } from "@tokenring-ai/memory/state/memoryState";
+
+const state = new MemoryState({ memories: [] });
+```
+
+**Properties:**
+- `name: string = "MemoryState"` — State slice name
+- `memories: string[]` — Array of memory strings
+
+**Methods:**
+- `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories
+- `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets
+- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
+- `serialize(): object` — Serializes memories for persistence
+- `deserialize(data: any): void` — Deserializes memories from stored data
+- `show(): string[]` — Returns formatted string representation of memories
+
+### Context Handler
+
+The `shortTermMemory` context handler automatically injects memories into agent context:
+
+```typescript
+import shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";
+
+export default async function * getContextItems(
+  input: string,
+  chatConfig: ChatConfig,
+  params: {},
+  agent: Agent
+): AsyncGenerator<ContextItem>
+```
+
+This yields memories as `ContextItem` objects with role "user" and memory content, making them available to the agent in all future interactions.
 
 ## Usage Examples
 
@@ -163,7 +210,7 @@ Adds a memory item via the memory service.
 import { z } from "zod";
 
 const inputSchema = z.object({
-  memory: z.string().describe("The fact, idea, or info to remember"),
+  memory: z.string().describe("The fact, idea, or info to remember."),
 });
 ```
 
@@ -179,9 +226,9 @@ await agent.executeTool('memory_add', {
 
 ## Chat Commands
 
-### /memory [operation] [arguments]
+### memory [operation] [arguments]
 
-The `/memory` command provides interactive memory management through chat.
+The `memory` command provides interactive memory management through chat.
 
 **No arguments:** Shows help message
 
@@ -189,20 +236,20 @@ The `/memory` command provides interactive memory management through chat.
 
 | Operation | Description | Example |
 |-----------|-------------|---------|
-| `list` | Shows all memory items with indices | `/memory list` |
-| `add <text>` | Adds a new memory item | `/memory add Remember to check emails` |
-| `clear` | Clears all memory items | `/memory clear` |
-| `remove <index>` | Removes memory item at specified index (0-based) | `/memory remove 0` |
-| `set <index> <text>` | Updates memory item at specified index | `/memory set 1 Updated meeting notes` |
+| `list` | Shows all memory items with indices | `memory list` |
+| `add <text>` | Adds a new memory item | `memory add Remember to check emails` |
+| `clear` | Clears all memory items | `memory clear` |
+| `remove <index>` | Removes memory item at specified index (0-based) | `memory remove 0` |
+| `set <index> <text>` | Updates memory item at specified index | `memory set 1 Updated meeting notes` |
 
 **Examples:**
 
 ```bash
-/memory add Remember to check emails tomorrow
-/memory list
-/memory remove 0
-/memory set 1 Updated meeting notes
-/memory clear
+memory add Remember to check emails tomorrow
+memory list
+memory remove 0
+memory set 1 Updated meeting notes
+memory clear
 ```
 
 ## Scripting Functions
@@ -246,7 +293,7 @@ app.installPlugin(memoryPlugin);
 **Automatic Registration:**
 - ShortTermMemoryService added to application services
 - `memory_add` tool registered with ChatService
-- `/memory` command registered with AgentCommandService
+- `memory` command registered with AgentCommandService
 - Global scripting functions (`addMemory`, `clearMemory`) registered with ScriptingService
 - Context handlers registered for automatic memory injection
 
