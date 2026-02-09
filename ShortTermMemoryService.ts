@@ -3,7 +3,7 @@ import {TokenRingService} from "@tokenring-ai/app/types";
 import {MemoryState} from "./state/memoryState.ts";
 
 export default class ShortTermMemoryService implements TokenRingService {
-  name = "ShortTermMemoryService";
+  readonly name = "ShortTermMemoryService";
   description = "Provides Short Term Memory functionality";
 
   attach(agent: Agent): void {

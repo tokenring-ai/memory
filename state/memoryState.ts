@@ -8,7 +8,7 @@ const serializationSchema = z.object({
 });
 
 export class MemoryState implements AgentStateSlice<typeof serializationSchema> {
-  name = "MemoryState";
+  readonly name = "MemoryState";
   serializationSchema = serializationSchema;
   memories: string[] = [];
 
