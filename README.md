@@ -1,9 +1,11 @@
 # @tokenring-ai/memory
 
 ## Overview
-The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions without persistent storage. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, and context handlers.
+
+The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions without persistent storage. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, context handlers, and scripting functions.
 
 ## Features
+
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
 - **Context Integration**: Memories are automatically injected into agent context for all future interactions
 - **Session Management**: Session-scoped storage—memories clear on chat or memory resets
@@ -11,7 +13,6 @@ The `@tokenring-ai/memory` package provides short-term memory management for AI 
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
 - **State Management**: Built-in state serialization/deserialization for persistence
 - **Context Injection**: Automatic injection of memories into agent context via context handlers
-- **Scripting Functions**: Register global functions for programmatic memory manipulation
 
 ## Installation
 
@@ -53,26 +54,27 @@ const state = new MemoryState({ memories: [] });
 
 **Properties:**
 - `name: string = "MemoryState"` — State slice name
+- `serializationSchema` — Zod schema for state serialization
 - `memories: string[]` — Array of memory strings
 
 **Methods:**
 - `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories
 - `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets
 - `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
-- `serialize(): object` — Serializes memories for persistence
-- `deserialize(data: any): void` — Deserializes memories from stored data
+- `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
+- `deserialize(data: z.output<typeof serializationSchema>): void` — Deserializes memories from stored data
 - `show(): string[]` — Returns formatted string representation of memories
 
 ### Context Handler
 
-The `shortTermMemory` context handler automatically injects memories into agent context:
+The `short-term-memory` context handler automatically injects memories into agent context:
 
 ```typescript
 import shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";
 
 export default async function * getContextItems(
   input: string,
-  chatConfig: ChatConfig,
+  chatConfig: ParsedChatConfig,
   params: {},
   agent: Agent
 ): AsyncGenerator<ContextItem>
@@ -186,6 +188,7 @@ const packageConfigSchema = z.object({});
 | `addMemory(memory, agent)` | Add a memory string | `memory: string`, `agent: Agent` | `void` |
 | `clearMemory(agent)` | Clear all memories | `agent: Agent` | `void` |
 | `spliceMemory(index, count, agent, ...items)` | Modify memory array | `index: number`, `count: number`, `agent: Agent`, `...items: string[]` | `void` |
+| `getMemories(input, chatConfig, params, agent)` | Yield memories as context items | `input: string`, `chatConfig: unknown`, `params: {}`, `agent: Agent` | `AsyncGenerator<ContextItem>` |
 
 ### MemoryState Methods
 
@@ -194,8 +197,8 @@ const packageConfigSchema = z.object({});
 | `constructor({memories})` | Create state slice | `{memories?: string[]}` | `MemoryState` |
 | `reset(what)` | Reset specific state components | `what: ResetWhat[]` | `void` |
 | `transferStateFromParent(parent)` | Transfer state from parent agent | `parent: Agent` | `void` |
-| `serialize()` | Convert to serializable object | None | `object` |
-| `deserialize(data)` | Restore from serialized data | `data: any` | `void` |
+| `serialize()` | Convert to serializable object | None | `z.output<typeof serializationSchema>` |
+| `deserialize(data)` | Restore from serialized data | `data: z.output<typeof serializationSchema>` | `void` |
 | `show()` | Human-readable state summary | None | `string[]` |
 
 ## Tools
@@ -203,6 +206,20 @@ const packageConfigSchema = z.object({});
 ### memory_add
 
 Adds a memory item via the memory service.
+
+**Tool Definition:**
+
+```typescript
+{
+  name: "memory_add",
+  displayName: "Memory/addMemory",
+  description: "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.",
+  inputSchema: z.object({
+    memory: z.string().describe("The fact, idea, or info to remember.")
+  }),
+  execute: (params, agent) => Promise<string>
+}
+```
 
 **Input Schema:**
 
@@ -349,6 +366,7 @@ pkg/memory/
 ```
 
 ### Contribution Guidelines
+
 - Follow established coding patterns
 - Write unit tests for new functionality
 - Update documentation for new features
