@@ -1,17 +1,16 @@
 import Agent from "@tokenring-ai/agent/Agent";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 const description =
   "/memory - Manage memory items.";
 
-async function execute(remainder: string, agent: Agent) {
+async function execute(remainder: string, agent: Agent): Promise<string> {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
-  // Show help if no arguments provided
   if (!remainder?.trim()) {
-    agent.chatOutput(help);
-    return;
+    return help;
   }
 
   const parts = remainder.trim().split(/\s+/);
@@ -20,65 +19,54 @@ async function execute(remainder: string, agent: Agent) {
 
   switch (operation) {
     case "list": {
-      await listMemories(memoryService, agent);
-      return;
+      return await listMemories(memoryService, agent);
     }
 
     case "add": {
       const memoryText = args.join(" ");
       if (!memoryText) {
-        agent.errorMessage("Please provide text for the memory item");
-        return;
+        throw new CommandFailedError("Please provide text for the memory item");
       }
       memoryService.addMemory(memoryText, agent);
-      agent.infoMessage(`Added new memory: ${memoryText}`);
-      break;
+      const updated = await listMemories(memoryService, agent);
+      return `Added new memory: ${memoryText}\n${updated}`;
     }
 
     case "clear": {
       memoryService.clearMemory(agent);
-      agent.infoMessage("Cleared all memory items");
-      break;
+      return "Cleared all memory items";
     }
 
     case "remove": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        agent.errorMessage("Please provide a valid index number");
-        return;
+        throw new CommandFailedError("Please provide a valid index number");
       }
       memoryService.spliceMemory(index, 1, agent);
-      agent.infoMessage(`Removed memory item at index ${index}`);
-      break;
+      const updated = await listMemories(memoryService, agent);
+      return `Removed memory item at index ${index}\n${updated}`;
     }
 
     case "set": {
       const index = Number.parseInt(args[0]);
       if (Number.isNaN(index)) {
-        agent.errorMessage("Please provide a valid index number");
-        return;
+        throw new CommandFailedError("Please provide a valid index number");
       }
       const newText = args.slice(1).join(" ");
       if (!newText) {
-        agent.errorMessage("Please provide text for the memory item");
-        return;
+        throw new CommandFailedError("Please provide text for the memory item");
       }
       memoryService.spliceMemory(index, 1, agent, newText);
-      agent.infoMessage(`Updated memory item at index ${index}`);
-      break;
+      const updated = await listMemories(memoryService, agent);
+      return `Updated memory item at index ${index}\n${updated}`;
     }
 
     default:
-      agent.errorMessage("Unknown operation. ");
-      // Intentionally not calling help() bound to this
-      return;
+      throw new CommandFailedError("Unknown operation.");
   }
-
-  // Show updated memories after operation
-  await listMemories(memoryService, agent);
 }
 
-async function listMemories(memoryService: any, agent: Agent) {
+async function listMemories(memoryService: any, agent: Agent): Promise<string> {
   let index = 0;
   const lines: string[] = [];
 
@@ -98,7 +86,7 @@ async function listMemories(memoryService: any, agent: Agent) {
     lines.push("No memory items stored");
   }
 
-  agent.infoMessage(lines.join("\n"));
+  return lines.join("\n");
 }
 
 const help: string = `# MEMORY MANAGEMENT COMMAND
