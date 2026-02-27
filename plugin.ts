@@ -5,7 +5,7 @@ import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
 import {z} from "zod";
 
-import chatCommands from "./chatCommands.ts";
+import agentCommands from "./commands.ts";
 import contextHandlers from "./contextHandlers.ts";
 import packageJSON from "./package.json" with {type: "json"};
 import ShortTermMemoryService from "./ShortTermMemoryService.js";
@@ -44,7 +44,7 @@ export default {
       chatService.registerContextHandlers(contextHandlers);
     });
     app.waitForService(AgentCommandService, agentCommandService =>
-      agentCommandService.addAgentCommands(chatCommands)
+      agentCommandService.addAgentCommands(agentCommands)
     );
     app.addServices(new ShortTermMemoryService());
   },

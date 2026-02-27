@@ -149,6 +149,7 @@ Update memory item at specific index
 - Use the list command before removing or updating items`;
 
 export default {
+  name: "memory",
   description,
   execute,
   help,

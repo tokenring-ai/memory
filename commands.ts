@@ -1,5 +1,5 @@
 import memory from "./commands/memory.ts";
 
-export default {
+export default [
   memory,
-};
+];
