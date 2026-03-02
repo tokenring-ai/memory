@@ -70,13 +70,11 @@ const state = new MemoryState({ memories: [] });
 The `short-term-memory` context handler automatically injects memories into agent context:
 
 ```typescript
-import shortTermMemory from "@tokenring-ai/memory/contextHandlers/shortTermMemory";
+import { ContextHandlerOptions, ContextItem } from "@tokenring-ai/chat/schema";
+import { MemoryState } from "@tokenring-ai/memory/state/memoryState";
 
-export default async function * getContextItems(
-  input: string,
-  chatConfig: ParsedChatConfig,
-  params: {},
-  agent: Agent
+export default async function* getContextItems(
+  { agent }: ContextHandlerOptions
 ): AsyncGenerator<ContextItem>
 ```
 
@@ -88,7 +86,7 @@ This yields memories as `ContextItem` objects with role "user" and memory conten
 
 ```typescript
 import Agent from '@tokenring-ai/agent/Agent';
-import { ShortTermMemoryService } from '@tokenring-ai/memory';
+import ShortTermMemoryService from '@tokenring-ai/memory/ShortTermMemoryService';
 
 const agent = new Agent({ services: [new ShortTermMemoryService()] });
 const memoryService = agent.requireServiceByType(ShortTermMemoryService);
@@ -188,7 +186,6 @@ const packageConfigSchema = z.object({});
 | `addMemory(memory, agent)` | Add a memory string | `memory: string`, `agent: Agent` | `void` |
 | `clearMemory(agent)` | Clear all memories | `agent: Agent` | `void` |
 | `spliceMemory(index, count, agent, ...items)` | Modify memory array | `index: number`, `count: number`, `agent: Agent`, `...items: string[]` | `void` |
-| `getMemories(input, chatConfig, params, agent)` | Yield memories as context items | `input: string`, `chatConfig: unknown`, `params: {}`, `agent: Agent` | `AsyncGenerator<ContextItem>` |
 
 ### MemoryState Methods
 
@@ -200,6 +197,12 @@ const packageConfigSchema = z.object({});
 | `serialize()` | Convert to serializable object | None | `z.output<typeof serializationSchema>` |
 | `deserialize(data)` | Restore from serialized data | `data: z.output<typeof serializationSchema>` | `void` |
 | `show()` | Human-readable state summary | None | `string[]` |
+
+### Context Handler
+
+| Function | Description | Parameters | Returns |
+|----------|-------------|------------|---------|
+| `getContextItems({agent})` | Yield memories as context items | `{agent: Agent}` | `AsyncGenerator<ContextItem>` |
 
 ## Tools
 
@@ -267,6 +270,71 @@ memory list
 memory remove 0
 memory set 1 Updated meeting notes
 memory clear
+```
+
+### Help Message
+
+When called without arguments, the command displays comprehensive help:
+
+```
+# MEMORY MANAGEMENT COMMAND
+
+## Usage
+
+/memory [operation] [arguments...]
+
+## Operations
+
+### list
+
+Display all stored memory items
+
+**Example:**
+/memory list
+
+### add <text>
+
+Add a new memory item
+
+**Examples:**
+/memory add Remember to buy groceries tomorrow
+/memory add Meeting notes: Discuss project timeline
+
+### clear
+
+Remove all memory items
+
+**Example:**
+/memory clear
+
+### remove <index>
+
+Remove memory item at specific index
+
+**Examples:**
+/memory remove 0
+/memory remove 3
+
+### set <index> <text>
+
+Update memory item at specific index
+
+**Examples:**
+/memory set 0 Updated meeting notes
+/memory set 2 Remember to buy groceries tomorrow
+
+## General Usage
+
+- Use /memory without arguments to show this help message
+- Memory items are displayed with their index number in brackets
+- Index numbers start from 0 (first item is [0])
+- Use the list command to see current memory items and their indices
+
+## Tips
+
+- Use descriptive text for better memory organization
+- Regularly review and clean up memory items
+- Use the list command before removing or updating items
 ```
 
 ## Scripting Functions
@@ -357,7 +425,7 @@ pkg/memory/
 ├── commands/
 │   └── memory.ts                         # Chat commands for managing memories
 ├── tools.ts                              # Exports agent tools
-├── chatCommands.ts                       # Exports chat commands
+├── commands.ts                           # Exports chat commands
 ├── contextHandlers.ts                    # Exports context handlers
 ├── plugin.ts                             # Plugin for automatic service registration
 ├── package.json                          # Package metadata and dependencies
