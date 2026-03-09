@@ -59,22 +59,22 @@ const state = new MemoryState({ memories: [] });
 
 **Methods:**
 - `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories
-- `reset(what: ResetWhat[]): void` — Clears memories when chat or memory resets
+- `reset(): void` — Clears memories when state is reset
 - `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
 - `deserialize(data: z.output<typeof serializationSchema>): void` — Deserializes memories from stored data
-- `show(): string[]` — Returns formatted string representation of memories
+- `show(): string[]` — Returns formatted string representation of memories with 1-based indexing
 
 ### Context Handler
 
 The `short-term-memory` context handler automatically injects memories into agent context:
 
 ```typescript
-import { ContextHandlerOptions, ContextItem } from "@tokenring-ai/chat/schema";
-import { MemoryState } from "@tokenring-ai/memory/state/memoryState";
+import {type ContextHandlerOptions, ContextItem} from "@tokenring-ai/chat/schema";
+import {MemoryState} from "@tokenring-ai/memory/state/memoryState";
 
 export default async function* getContextItems(
-  { agent }: ContextHandlerOptions
+  {agent}: ContextHandlerOptions
 ): AsyncGenerator<ContextItem>
 ```
 
@@ -152,7 +152,7 @@ restoredState.deserialize(serializedData);
 const parentAgent = new Agent({ services: [new ShortTermMemoryService()] });
 parentAgent.addState(new MemoryState({ memories: ['Important fact'] }));
 
-const subAgent = agent.createSubAgent();
+const subAgent = parentAgent.createSubAgent();
 const subState = subAgent.getState(MemoryState);
 subState.transferStateFromParent(parentAgent);
 // Sub-agent now has access to parent's memories
@@ -192,7 +192,7 @@ const packageConfigSchema = z.object({});
 | Method | Description | Parameters | Returns |
 |--------|-------------|------------|---------|
 | `constructor({memories})` | Create state slice | `{memories?: string[]}` | `MemoryState` |
-| `reset(what)` | Reset specific state components | `what: ResetWhat[]` | `void` |
+| `reset()` | Reset memory state | None | `void` |
 | `transferStateFromParent(parent)` | Transfer state from parent agent | `parent: Agent` | `void` |
 | `serialize()` | Convert to serializable object | None | `z.output<typeof serializationSchema>` |
 | `deserialize(data)` | Restore from serialized data | `data: z.output<typeof serializationSchema>` | `void` |
@@ -246,96 +246,15 @@ await agent.executeTool('memory_add', {
 
 ## Chat Commands
 
-### memory [operation] [arguments]
+**Location:** `commands/memory/`
 
-The `memory` command provides interactive memory management through chat.
-
-**No arguments:** Shows help message
-
-**Operations:**
-
-| Operation | Description | Example |
-|-----------|-------------|---------|
-| `list` | Shows all memory items with indices | `memory list` |
-| `add <text>` | Adds a new memory item | `memory add Remember to check emails` |
-| `clear` | Clears all memory items | `memory clear` |
-| `remove <index>` | Removes memory item at specified index (0-based) | `memory remove 0` |
-| `set <index> <text>` | Updates memory item at specified index | `memory set 1 Updated meeting notes` |
-
-**Examples:**
-
-```bash
-memory add Remember to check emails tomorrow
-memory list
-memory remove 0
-memory set 1 Updated meeting notes
-memory clear
-```
-
-### Help Message
-
-When called without arguments, the command displays comprehensive help:
-
-```
-# MEMORY MANAGEMENT COMMAND
-
-## Usage
-
-/memory [operation] [arguments...]
-
-## Operations
-
-### list
-
-Display all stored memory items
-
-**Example:**
-/memory list
-
-### add <text>
-
-Add a new memory item
-
-**Examples:**
-/memory add Remember to buy groceries tomorrow
-/memory add Meeting notes: Discuss project timeline
-
-### clear
-
-Remove all memory items
-
-**Example:**
-/memory clear
-
-### remove <index>
-
-Remove memory item at specific index
-
-**Examples:**
-/memory remove 0
-/memory remove 3
-
-### set <index> <text>
-
-Update memory item at specific index
-
-**Examples:**
-/memory set 0 Updated meeting notes
-/memory set 2 Remember to buy groceries tomorrow
-
-## General Usage
-
-- Use /memory without arguments to show this help message
-- Memory items are displayed with their index number in brackets
-- Index numbers start from 0 (first item is [0])
-- Use the list command to see current memory items and their indices
-
-## Tips
-
-- Use descriptive text for better memory organization
-- Regularly review and clean up memory items
-- Use the list command before removing or updating items
-```
+| Command | File | Description |
+|---------|------|-------------|
+| `/memory list` | `commands/memory/list.ts` | Display all stored memory items |
+| `/memory add <text>` | `commands/memory/add.ts` | Add a new memory item |
+| `/memory clear` | `commands/memory/clear.ts` | Remove all memory items |
+| `/memory remove <index>` | `commands/memory/remove.ts` | Remove memory item at index |
+| `/memory set <index> <text>` | `commands/memory/set.ts` | Update memory item at index |
 
 ## Scripting Functions
 
@@ -362,6 +281,39 @@ The package provides comprehensive error handling:
 - **Context Injection Errors**: Graceful handling of missing context handlers
 - **Service Errors**: Descriptive errors for missing dependencies
 - **Index Errors**: Validation for invalid memory indices in remove/set operations
+- **Command Errors**: Uses `CommandFailedError` for chat command failures
+
+### Error Types
+
+| Error Type | Description | When Thrown |
+|------------|-------------|-------------|
+| `Error` | Missing parameter error | When `memory_add` tool receives empty memory |
+| `CommandFailedError` | Command execution failure | When memory command receives invalid operation or parameters |
+
+### Error Examples
+
+```typescript
+// Tool error - missing memory parameter
+try {
+  await agent.executeTool('memory_add', { memory: '' });
+} catch (error) {
+  console.error(error.message); // "[memory_add] Missing parameter: memory"
+}
+
+// Command error - invalid operation
+try {
+  await agent.executeCommand('memory invalid_op');
+} catch (error) {
+  console.error(error.message); // "Unknown operation."
+}
+
+// Command error - missing text
+try {
+  await agent.executeCommand('memory add');
+} catch (error) {
+  console.error(error.message); // "Please provide text for the memory item"
+}
+```
 
 ## Integration
 
@@ -376,10 +328,10 @@ app.installPlugin(memoryPlugin);
 ```
 
 **Automatic Registration:**
-- ShortTermMemoryService added to application services
-- `memory_add` tool registered with ChatService
-- `memory` command registered with AgentCommandService
-- Global scripting functions (`addMemory`, `clearMemory`) registered with ScriptingService
+- `ShortTermMemoryService` added to application services
+- `memory_add` tool registered with `ChatService`
+- `memory` command registered with `AgentCommandService`
+- Global scripting functions (`addMemory`, `clearMemory`) registered with `ScriptingService`
 - Context handlers registered for automatic memory injection
 
 ### Agent Integration
@@ -391,8 +343,11 @@ const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 // Add memory
 memoryService.addMemory('Important fact', agent);
 
-// List all memories (via chat command)
+// Clear all memories
 memoryService.clearMemory(agent);
+
+// Modify memory at specific index
+memoryService.spliceMemory(0, 1, agent, 'Updated fact');
 ```
 
 ## Development
@@ -423,7 +378,14 @@ pkg/memory/
 ├── tools/
 │   └── addMemory.ts                      # Tool to add a memory item to the agent's memory state
 ├── commands/
-│   └── memory.ts                         # Chat commands for managing memories
+│   ├── memory.ts                         # /memory command index
+│   └── memory/
+│       ├── list.ts                       # /memory list
+│       ├── add.ts                        # /memory add
+│       ├── clear.ts                      # /memory clear
+│       ├── remove.ts                     # /memory remove
+│       ├── set.ts                        # /memory set
+│       └── _listMemories.ts              # shared list helper
 ├── tools.ts                              # Exports agent tools
 ├── commands.ts                           # Exports chat commands
 ├── contextHandlers.ts                    # Exports context handlers
@@ -432,6 +394,24 @@ pkg/memory/
 ├── vitest.config.ts                      # Vitest configuration
 └── README.md                             # This documentation
 ```
+
+### Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@tokenring-ai/app` | 0.2.0 | Base application framework |
+| `@tokenring-ai/chat` | 0.2.0 | Chat service and tool definitions |
+| `@tokenring-ai/agent` | 0.2.0 | Agent framework and state management |
+| `@tokenring-ai/utility` | 0.2.0 | Shared utilities and helpers |
+| `@tokenring-ai/scripting` | 0.2.0 | Scripting service for global functions |
+| `zod` | ^4.3.6 | Schema validation and serialization |
+
+### Dev Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `vitest` | ^4.0.18 | Testing framework |
+| `typescript` | ^5.9.3 | TypeScript compiler |
 
 ### Contribution Guidelines
 
