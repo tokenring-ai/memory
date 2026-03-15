@@ -4,6 +4,12 @@
 
 The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions without persistent storage. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, context handlers, and scripting functions.
 
+## Installation
+
+```bash
+bun install @tokenring-ai/memory
+```
+
 ## Features
 
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
@@ -13,14 +19,9 @@ The `@tokenring-ai/memory` package provides short-term memory management for AI 
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
 - **State Management**: Built-in state serialization/deserialization for persistence
 - **Context Injection**: Automatic injection of memories into agent context via context handlers
+- **Scripting Support**: Native functions available in scripting context
 
-## Installation
-
-```bash
-bun install @tokenring-ai/memory
-```
-
-## Core Components
+## Core Components/API
 
 ### ShortTermMemoryService
 
@@ -58,7 +59,7 @@ const state = new MemoryState({ memories: [] });
 - `memories: string[]` — Array of memory strings
 
 **Methods:**
-- `constructor({memories?: string[]})` — Creates a new memory state with optional initial memories
+- `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial memories
 - `reset(): void` — Clears memories when state is reset
 - `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
@@ -101,37 +102,43 @@ memoryService.clearMemory(agent);
 memoryService.spliceMemory(0, 1, agent, 'User prefers tea over coffee');
 ```
 
-### Context Integration
-
-When the agent processes a request, memories are automatically injected into the context:
+### Using Chat Commands
 
 ```typescript
-// Context structure after adding memories:
-// [
-//   ...previous conversation,
-//   { role: "user", content: "User prefers coffee over tea" },
-//   { role: "user", content: "Meeting scheduled for 2 PM tomorrow" }
-// ]
+// Add a memory
+await agent.executeCommand('/memory add Remember to review the report');
+
+// List all memories
+const result = await agent.executeCommand('/memory list');
+console.log(result);
+
+// Remove a memory by index
+await agent.executeCommand('/memory remove 0');
+
+// Update a memory
+await agent.executeCommand('/memory set 0 Updated meeting notes');
+
+// Clear all memories
+await agent.executeCommand('/memory clear');
 ```
 
-### Tool Integration
+### Using Tools
 
 ```typescript
-// Tools can be executed programmatically
+// Execute memory_add tool programmatically
 await agent.executeTool('memory_add', {
   memory: 'Meeting scheduled for 2 PM tomorrow'
 });
 ```
 
-### Chat Command Usage
+### Using Scripting Functions
 
-```bash
-# Agent input simulation
-/memory add Remember to review the quarterly report
-/memory list
-# Output:
-# Memory items:
-# [0] Remember to review the quarterly report
+```typescript
+import { ScriptingService } from '@tokenring-ai/scripting';
+
+// When scripting is available, global functions are registered
+await scriptingService.eval('addMemory("Important fact")');
+await scriptingService.eval('clearMemory()');
 ```
 
 ### State Persistence
@@ -140,7 +147,9 @@ await agent.executeTool('memory_add', {
 // Memories persist across state serialization
 const state = agent.getState(MemoryState);
 const serializedData = state.serialize();
+
 // ... later ...
+
 const restoredState = new MemoryState();
 restoredState.deserialize(serializedData);
 ```
@@ -158,15 +167,7 @@ subState.transferStateFromParent(parentAgent);
 // Sub-agent now has access to parent's memories
 ```
 
-### Scripting Functions
-
-```typescript
-// When scripting is available, global functions are registered
-await scriptingService.eval('addMemory("Important fact")');
-await scriptingService.eval('clearMemory()');
-```
-
-## Plugin Configuration
+## Configuration
 
 The package does not require any runtime configuration. The configuration schema is empty:
 
@@ -176,144 +177,23 @@ import { z } from "zod";
 const packageConfigSchema = z.object({});
 ```
 
-## API Reference
+## Dependencies
 
-### ShortTermMemoryService Methods
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@tokenring-ai/app` | 0.2.0 | Base application framework |
+| `@tokenring-ai/chat` | 0.2.0 | Chat service and tool definitions |
+| `@tokenring-ai/agent` | 0.2.0 | Agent framework and state management |
+| `@tokenring-ai/utility` | 0.2.0 | Shared utilities and helpers |
+| `@tokenring-ai/scripting` | 0.2.0 | Scripting service for global functions |
+| `zod` | ^4.3.6 | Schema validation and serialization |
 
-| Method | Description | Parameters | Returns |
-|--------|-------------|------------|---------|
-| `attach(agent)` | Initialize memory state | `agent: Agent` | `void` |
-| `addMemory(memory, agent)` | Add a memory string | `memory: string`, `agent: Agent` | `void` |
-| `clearMemory(agent)` | Clear all memories | `agent: Agent` | `void` |
-| `spliceMemory(index, count, agent, ...items)` | Modify memory array | `index: number`, `count: number`, `agent: Agent`, `...items: string[]` | `void` |
+### Dev Dependencies
 
-### MemoryState Methods
-
-| Method | Description | Parameters | Returns |
-|--------|-------------|------------|---------|
-| `constructor({memories})` | Create state slice | `{memories?: string[]}` | `MemoryState` |
-| `reset()` | Reset memory state | None | `void` |
-| `transferStateFromParent(parent)` | Transfer state from parent agent | `parent: Agent` | `void` |
-| `serialize()` | Convert to serializable object | None | `z.output<typeof serializationSchema>` |
-| `deserialize(data)` | Restore from serialized data | `data: z.output<typeof serializationSchema>` | `void` |
-| `show()` | Human-readable state summary | None | `string[]` |
-
-### Context Handler
-
-| Function | Description | Parameters | Returns |
-|----------|-------------|------------|---------|
-| `getContextItems({agent})` | Yield memories as context items | `{agent: Agent}` | `AsyncGenerator<ContextItem>` |
-
-## Tools
-
-### memory_add
-
-Adds a memory item via the memory service.
-
-**Tool Definition:**
-
-```typescript
-{
-  name: "memory_add",
-  displayName: "Memory/addMemory",
-  description: "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.",
-  inputSchema: z.object({
-    memory: z.string().describe("The fact, idea, or info to remember.")
-  }),
-  execute: (params, agent) => Promise<string>
-}
-```
-
-**Input Schema:**
-
-```typescript
-import { z } from "zod";
-
-const inputSchema = z.object({
-  memory: z.string().describe("The fact, idea, or info to remember."),
-});
-```
-
-**Description:** "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind."
-
-**Example:**
-
-```typescript
-await agent.executeTool('memory_add', {
-  memory: 'User prefers detailed technical explanations'
-});
-```
-
-## Chat Commands
-
-**Location:** `commands/memory/`
-
-| Command | File | Description |
-|---------|------|-------------|
-| `/memory list` | `commands/memory/list.ts` | Display all stored memory items |
-| `/memory add <text>` | `commands/memory/add.ts` | Add a new memory item |
-| `/memory clear` | `commands/memory/clear.ts` | Remove all memory items |
-| `/memory remove <index>` | `commands/memory/remove.ts` | Remove memory item at index |
-| `/memory set <index> <text>` | `commands/memory/set.ts` | Update memory item at index |
-
-## Scripting Functions
-
-The package registers global scripting functions when the ScriptingService is available:
-
-| Function | Description | Parameters | Returns |
-|----------|-------------|------------|---------|
-| `addMemory(memory)` | Add a memory string | `memory: string` | `string` confirmation |
-| `clearMemory()` | Clear all memories | None | `string` confirmation |
-
-**Example:**
-
-```typescript
-await scriptingService.eval('addMemory("User preference: dark mode")');
-await scriptingService.eval('clearMemory()');
-```
-
-## Error Handling
-
-The package provides comprehensive error handling:
-
-- **Invalid Parameters**: Clear validation errors for invalid input
-- **State Errors**: Proper handling of invalid memory operations
-- **Context Injection Errors**: Graceful handling of missing context handlers
-- **Service Errors**: Descriptive errors for missing dependencies
-- **Index Errors**: Validation for invalid memory indices in remove/set operations
-- **Command Errors**: Uses `CommandFailedError` for chat command failures
-
-### Error Types
-
-| Error Type | Description | When Thrown |
-|------------|-------------|-------------|
-| `Error` | Missing parameter error | When `memory_add` tool receives empty memory |
-| `CommandFailedError` | Command execution failure | When memory command receives invalid operation or parameters |
-
-### Error Examples
-
-```typescript
-// Tool error - missing memory parameter
-try {
-  await agent.executeTool('memory_add', { memory: '' });
-} catch (error) {
-  console.error(error.message); // "[memory_add] Missing parameter: memory"
-}
-
-// Command error - invalid operation
-try {
-  await agent.executeCommand('memory invalid_op');
-} catch (error) {
-  console.error(error.message); // "Unknown operation."
-}
-
-// Command error - missing text
-try {
-  await agent.executeCommand('memory add');
-} catch (error) {
-  console.error(error.message); // "Please provide text for the memory item"
-}
-```
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `vitest` | ^4.0.18 | Testing framework |
+| `typescript` | 5.9.3 | TypeScript compiler |
 
 ## Integration
 
@@ -329,28 +209,196 @@ app.installPlugin(memoryPlugin);
 
 **Automatic Registration:**
 - `ShortTermMemoryService` added to application services
-- `memory_add` tool registered with `ChatService`
-- `memory` command registered with `AgentCommandService`
+- `addMemory` tool registered with `ChatService`
+- `memory` commands registered with `AgentCommandService`
 - Global scripting functions (`addMemory`, `clearMemory`) registered with `ScriptingService`
 - Context handlers registered for automatic memory injection
 
 ### Agent Integration
 
 ```typescript
-// Service automatically available through agent
+import Agent from '@tokenring-ai/agent/Agent';
+import ShortTermMemoryService from '@tokenring-ai/memory/ShortTermMemoryService';
+
+const agent = new Agent({ services: [new ShortTermMemoryService()] });
 const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
 // Add memory
-memoryService.addMemory('Important fact', agent);
+memoryService.addMemory('User prefers coffee over tea', agent);
 
 // Clear all memories
 memoryService.clearMemory(agent);
 
-// Modify memory at specific index
-memoryService.spliceMemory(0, 1, agent, 'Updated fact');
+// Manipulate memories
+memoryService.spliceMemory(0, 1, agent, 'User prefers tea over coffee');
 ```
 
-## Development
+### Tool Integration
+
+```typescript
+// Tools can be executed programmatically
+await agent.executeTool('memory_add', {
+  memory: 'Meeting scheduled for 2 PM tomorrow'
+});
+```
+
+### State Management Integration
+
+```typescript
+// Memories persist across state serialization
+const state = agent.getState(MemoryState);
+const serializedData = state.serialize();
+
+// ... later ...
+
+const restoredState = new MemoryState();
+restoredState.deserialize(serializedData);
+```
+
+### Sub-agent Integration
+
+```typescript
+// Memories can be transferred to sub-agents
+const parentAgent = new Agent({ services: [new ShortTermMemoryService()] });
+parentAgent.addState(new MemoryState({ memories: ['Important fact'] }));
+
+const subAgent = parentAgent.createSubAgent();
+const subState = subAgent.getState(MemoryState);
+subState.transferStateFromParent(parentAgent);
+// Sub-agent now has access to parent's memories
+```
+
+## Chat Commands
+
+The package provides the following slash-prefixed commands:
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `/memory list` | Display all stored memory items | `/memory list` |
+| `/memory add <text>` | Add a new memory item | `/memory add Remember to review the report` |
+| `/memory clear` | Remove all memory items | `/memory clear` |
+| `/memory remove <index>` | Remove memory item at index | `/memory remove 0` |
+| `/memory set <index> <text>` | Update memory item at index | `/memory set 0 Updated notes` |
+
+### Command Details
+
+#### `/memory list`
+
+Display all stored memory items.
+
+**Help:**
+```
+# /memory list
+
+Display all stored memory items.
+
+## Example
+
+/memory list
+```
+
+**Output Format:**
+```
+Memory items:
+[0] First memory item
+[1] Second memory item
+```
+
+#### `/memory add <text>`
+
+Add a new memory item.
+
+**Help:**
+```
+# /memory add
+
+Add a new memory item.
+
+## Example
+
+/memory add Remember to buy groceries tomorrow
+```
+
+**Output:**
+```
+Added new memory: Remember to buy groceries tomorrow
+Memory items:
+[0] Remember to buy groceries tomorrow
+```
+
+#### `/memory clear`
+
+Remove all memory items.
+
+**Help:**
+```
+# /memory clear
+
+Remove all memory items.
+
+## Example
+
+/memory clear
+```
+
+**Output:**
+```
+Cleared all memory items
+```
+
+#### `/memory remove <index>`
+
+Remove memory item at specific index.
+
+**Help:**
+```
+# /memory remove
+
+Remove memory item at specific index.
+
+## Example
+
+/memory remove 0
+```
+
+**Output:**
+```
+Removed memory item at index 0
+Memory items:
+[0] Remaining memory item
+```
+
+#### `/memory set <index> <text>`
+
+Update memory item at specific index.
+
+**Help:**
+```
+# /memory set
+
+Update memory item at specific index.
+
+## Example
+
+/memory set 0 Updated meeting notes
+```
+
+**Output:**
+```
+Updated memory item at index 0
+Memory items:
+[0] Updated meeting notes
+```
+
+## Best Practices
+
+1. **Use Descriptive Memories**: Store clear, concise facts that will be useful in future interactions
+2. **Regular Cleanup**: Use `/memory clear` or `/memory remove` to maintain relevant memories
+3. **Context Awareness**: Remember that memories are injected into every agent interaction
+4. **Session Scope**: Be aware that memories are session-scoped and will be lost on reset
+5. **Sub-agent Transfer**: Use `transferStateFromParent` when creating sub-agents that need context
+
+## Testing and Development
 
 ### Testing
 
@@ -385,7 +433,7 @@ pkg/memory/
 │       ├── clear.ts                      # /memory clear
 │       ├── remove.ts                     # /memory remove
 │       ├── set.ts                        # /memory set
-│       └── _listMemories.ts              # shared list helper
+│       └── _listMemories.ts              # Shared list helper
 ├── tools.ts                              # Exports agent tools
 ├── commands.ts                           # Exports chat commands
 ├── contextHandlers.ts                    # Exports context handlers
@@ -395,30 +443,12 @@ pkg/memory/
 └── README.md                             # This documentation
 ```
 
-### Dependencies
+## Related Components
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `@tokenring-ai/app` | 0.2.0 | Base application framework |
-| `@tokenring-ai/chat` | 0.2.0 | Chat service and tool definitions |
-| `@tokenring-ai/agent` | 0.2.0 | Agent framework and state management |
-| `@tokenring-ai/utility` | 0.2.0 | Shared utilities and helpers |
-| `@tokenring-ai/scripting` | 0.2.0 | Scripting service for global functions |
-| `zod` | ^4.3.6 | Schema validation and serialization |
-
-### Dev Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `vitest` | ^4.0.18 | Testing framework |
-| `typescript` | ^5.9.3 | TypeScript compiler |
-
-### Contribution Guidelines
-
-- Follow established coding patterns
-- Write unit tests for new functionality
-- Update documentation for new features
-- Ensure all changes work with TokenRing agent framework
+- `@tokenring-ai/agent` - Core agent framework
+- `@tokenring-ai/chat` - Chat service and tool definitions
+- `@tokenring-ai/app` - Base application framework
+- `@tokenring-ai/scripting` - Scripting service for global functions
 
 ## License
 
