@@ -25,8 +25,7 @@ async function execute(
   return "Memory added";
 }
 
-const description =
-  "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.";
+const description = "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.";
 
 const inputSchema = z.object({
   memory: z.string().describe("The fact, idea, or info to remember."),

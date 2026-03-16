@@ -1,12 +1,12 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
 
 export default {
   name: "memory set",
-  description: "/memory set <index> <text> - Update memory item at index",
+  description: "Update memory item at index",
   help: `# /memory set\n\nUpdate memory item at specific index.\n\n## Example\n\n/memory set 0 Updated meeting notes`,
   execute: async (remainder: string, agent: Agent): Promise<string> => {
     const parts = remainder.trim().split(/\s+/);

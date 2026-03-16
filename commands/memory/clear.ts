@@ -4,7 +4,7 @@ import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 
 export default {
   name: "memory clear",
-  description: "/memory clear - Remove all memory items",
+  description: "Remove all memory items",
   help: `# /memory clear\n\nRemove all memory items.\n\n## Example\n\n/memory clear`,
   execute: async (_remainder: string, agent: Agent): Promise<string> => {
     agent.requireServiceByType(ShortTermMemoryService).clearMemory(agent);

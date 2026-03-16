@@ -1,12 +1,12 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
 
 export default {
   name: "memory remove",
-  description: "/memory remove <index> - Remove memory item at index",
+  description: "Remove memory item at index",
   help: `# /memory remove\n\nRemove memory item at specific index.\n\n## Example\n\n/memory remove 0`,
   execute: async (remainder: string, agent: Agent): Promise<string> => {
     const index = Number.parseInt(remainder.trim());
