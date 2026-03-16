@@ -1,12 +1,21 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
+
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  return _listMemories(agent.requireServiceByType(ShortTermMemoryService), agent);
+}
 
 export default {
   name: "memory list",
   description: "Display all stored memory items",
-  help: `# /memory list\n\nDisplay all stored memory items.\n\n## Example\n\n/memory list`,
-  execute: async (_remainder: string, agent: Agent): Promise<string> =>
-    _listMemories(agent.requireServiceByType(ShortTermMemoryService), agent),
-} satisfies TokenRingAgentCommand;
+  inputSchema,
+  execute,
+  help: `Display all stored memory items.
+
+## Example
+
+/memory list`,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;
