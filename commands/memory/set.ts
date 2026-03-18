@@ -1,4 +1,3 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
@@ -12,21 +11,14 @@ const inputSchema = {
       minimum: 0,
     }
   },
-  positionals: [
-    {
-      name: "text",
-      description: "New text for the memory item",
-      required: true,
-      greedy: true,
-    },
-  ]
+  remainder: {name: "text", description: "New text for the memory item", required: true},
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals: { text }, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({remainder, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const index = args["--index"]
-  if (!text) throw new CommandFailedError("Please provide text for the memory item");
+
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
-  memoryService.spliceMemory(index, 1, agent, text);
+  memoryService.spliceMemory(index, 1, agent, remainder);
   return `Updated memory item at index ${index}\n${await _listMemories(memoryService, agent)}`;
 }
 

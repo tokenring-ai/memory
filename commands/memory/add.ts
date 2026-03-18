@@ -1,23 +1,16 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
 
 const inputSchema = {
   args: {},
-  positionals: [{
-    name: "text",
-    description: "Memory text to add",
-    required: true,
-    greedy: true,
-  }],
-  allowAttachments: false,
+  remainder: {name: "text", description: "Memory text to add", required: true}
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({positionals: { text }, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({remainder, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
-  memoryService.addMemory(text, agent);
-  return `Added new memory: ${text}\n${await _listMemories(memoryService, agent)}`;
+  memoryService.addMemory(remainder, agent);
+  return `Added new memory: ${remainder}\n${await _listMemories(memoryService, agent)}`;
 }
 
 export default {
