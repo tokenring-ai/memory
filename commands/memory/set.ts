@@ -15,7 +15,7 @@ const inputSchema = {
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({remainder, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const index = args["--index"]
+  const index = args["--index"];
 
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
   memoryService.spliceMemory(index, 1, agent, remainder);

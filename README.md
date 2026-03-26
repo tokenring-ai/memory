@@ -2,24 +2,23 @@
 
 ## Overview
 
-The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions without persistent storage. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, context handlers, and scripting functions.
+The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, context handlers, and scripting functions.
 
 ## Installation
 
 ```bash
-bun install @tokenring-ai/memory
+bun add @tokenring-ai/memory
 ```
 
 ## Features
 
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
-- **Context Integration**: Memories are automatically injected into agent context for all future interactions
-- **Session Management**: Session-scoped storage—memories clear on chat or memory resets
+- **Context Integration**: Memories are automatically injected into agent context for all future interactions via context handlers
+- **State Management**: Built-in state serialization/deserialization for persistence
 - **Sub-agent Persistence**: Memories can be transferred from parent agents to sub-agents
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
-- **State Management**: Built-in state serialization/deserialization for persistence
-- **Context Injection**: Automatic injection of memories into agent context via context handlers
-- **Scripting Support**: Native functions available in scripting context
+- **Scripting Support**: Native functions available in scripting context (`addMemory`, `clearMemory`)
+- **Agent State Integration**: Uses `MemoryState` agent state slice for storage
 
 ## Core Components/API
 
@@ -192,8 +191,8 @@ const packageConfigSchema = z.object({});
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `vitest` | ^4.0.18 | Testing framework |
-| `typescript` | 5.9.3 | TypeScript compiler |
+| `vitest` | ^4.1.1 | Testing framework |
+| `typescript` | ^6.0.2 | TypeScript compiler |
 
 ## Integration
 
@@ -209,7 +208,7 @@ app.installPlugin(memoryPlugin);
 
 **Automatic Registration:**
 - `ShortTermMemoryService` added to application services
-- `addMemory` tool registered with `ChatService`
+- `memory_add` tool registered with `ChatService`
 - `memory` commands registered with `AgentCommandService`
 - Global scripting functions (`addMemory`, `clearMemory`) registered with `ScriptingService`
 - Context handlers registered for automatic memory injection
@@ -390,12 +389,29 @@ Memory items:
 [0] Updated meeting notes
 ```
 
+## Tools
+
+The package provides the following tool for agent interaction:
+
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `memory_add` | Add an item to the memory list | `memory: string` - The fact, idea, or info to remember |
+
+### Tool Usage
+
+```typescript
+// Execute the memory_add tool
+await agent.executeTool('memory_add', {
+  memory: 'User prefers coffee over tea'
+});
+```
+
 ## Best Practices
 
 1. **Use Descriptive Memories**: Store clear, concise facts that will be useful in future interactions
 2. **Regular Cleanup**: Use `/memory clear` or `/memory remove` to maintain relevant memories
-3. **Context Awareness**: Remember that memories are injected into every agent interaction
-4. **Session Scope**: Be aware that memories are session-scoped and will be lost on reset
+3. **Context Awareness**: Remember that memories are injected into every agent interaction via context handlers
+4. **Session Scope**: Be aware that memories are session-scoped and will be lost on state reset unless explicitly persisted
 5. **Sub-agent Transfer**: Use `transferStateFromParent` when creating sub-agents that need context
 
 ## Testing and Development
