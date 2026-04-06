@@ -60,10 +60,10 @@ const state = new MemoryState({ memories: [] });
 **Methods:**
 - `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial memories
 - `reset(): void` — Clears memories when state is reset
-- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent
+- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent by serializing/deserializing
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
 - `deserialize(data: z.output<typeof serializationSchema>): void` — Deserializes memories from stored data
-- `show(): string[]` — Returns formatted string representation of memories with 1-based indexing
+- `show(): string[]` — Returns formatted string array representation of memories with 1-based indexing (e.g., `["Memories: 2", "  [1] First memory", "  [2] Second memory"]`)
 
 ### Context Handler
 
@@ -104,18 +104,19 @@ memoryService.spliceMemory(0, 1, agent, 'User prefers tea over coffee');
 ### Using Chat Commands
 
 ```typescript
-// Add a memory
+// Add a memory (text is captured as remainder)
 await agent.executeCommand('/memory add Remember to review the report');
 
 // List all memories
 const result = await agent.executeCommand('/memory list');
 console.log(result);
+// Output: "Memory items:\n[0] Remember to review the report"
 
-// Remove a memory by index
-await agent.executeCommand('/memory remove 0');
+// Remove a memory by index (using --index flag)
+await agent.executeCommand('/memory remove --index 0');
 
-// Update a memory
-await agent.executeCommand('/memory set 0 Updated meeting notes');
+// Update a memory (using --index flag, text as remainder)
+await agent.executeCommand('/memory set --index 0 Updated meeting notes');
 
 // Clear all memories
 await agent.executeCommand('/memory clear');
@@ -271,13 +272,13 @@ subState.transferStateFromParent(parentAgent);
 
 The package provides the following slash-prefixed commands:
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `/memory list` | Display all stored memory items | `/memory list` |
-| `/memory add <text>` | Add a new memory item | `/memory add Remember to review the report` |
-| `/memory clear` | Remove all memory items | `/memory clear` |
-| `/memory remove <index>` | Remove memory item at index | `/memory remove 0` |
-| `/memory set <index> <text>` | Update memory item at index | `/memory set 0 Updated notes` |
+| Command | Description | Parameters | Example |
+|---------|-------------|------------|---------|
+| `/memory list` | Display all stored memory items | None | `/memory list` |
+| `/memory add` | Add a new memory item | `text` (remainder) | `/memory add Remember to review the report` |
+| `/memory clear` | Remove all memory items | None | `/memory clear` |
+| `/memory remove` | Remove memory item at index | `--index` (number) | `/memory remove --index 0` |
+| `/memory set` | Update memory item at index | `--index` (number), `text` (remainder) | `/memory set --index 0 Updated notes` |
 
 ### Command Details
 
@@ -285,14 +286,8 @@ The package provides the following slash-prefixed commands:
 
 Display all stored memory items.
 
-**Help:**
-```
-# /memory list
-
-Display all stored memory items.
-
-## Example
-
+**Example:**
+```bash
 /memory list
 ```
 
@@ -303,18 +298,18 @@ Memory items:
 [1] Second memory item
 ```
 
-#### `/memory add <text>`
-
-Add a new memory item.
-
-**Help:**
+If no memories are stored:
 ```
-# /memory add
+Memory items:
+No memory items stored
+```
 
-Add a new memory item.
+#### `/memory add`
 
-## Example
+Add a new memory item. The text after the command is captured as a remainder parameter.
 
+**Example:**
+```bash
 /memory add Remember to buy groceries tomorrow
 ```
 
@@ -329,14 +324,8 @@ Memory items:
 
 Remove all memory items.
 
-**Help:**
-```
-# /memory clear
-
-Remove all memory items.
-
-## Example
-
+**Example:**
+```bash
 /memory clear
 ```
 
@@ -345,19 +334,13 @@ Remove all memory items.
 Cleared all memory items
 ```
 
-#### `/memory remove <index>`
+#### `/memory remove`
 
-Remove memory item at specific index.
+Remove memory item at specific index using the `--index` flag.
 
-**Help:**
-```
-# /memory remove
-
-Remove memory item at specific index.
-
-## Example
-
-/memory remove 0
+**Example:**
+```bash
+/memory remove --index 0
 ```
 
 **Output:**
@@ -367,19 +350,13 @@ Memory items:
 [0] Remaining memory item
 ```
 
-#### `/memory set <index> <text>`
+#### `/memory set`
 
-Update memory item at specific index.
+Update memory item at specific index using the `--index` flag. The text after the flags is captured as a remainder parameter.
 
-**Help:**
-```
-# /memory set
-
-Update memory item at specific index.
-
-## Example
-
-/memory set 0 Updated meeting notes
+**Example:**
+```bash
+/memory set --index 0 Updated meeting notes
 ```
 
 **Output:**
@@ -393,9 +370,9 @@ Memory items:
 
 The package provides the following tool for agent interaction:
 
-| Tool | Description | Parameters |
-|------|-------------|------------|
-| `memory_add` | Add an item to the memory list | `memory: string` - The fact, idea, or info to remember |
+| Tool | Display Name | Description | Parameters |
+|------|--------------|-------------|------------|
+| `memory_add` | Memory/addMemory | Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind. | `memory: string` - The fact, idea, or info to remember |
 
 ### Tool Usage
 
@@ -405,6 +382,10 @@ await agent.executeTool('memory_add', {
   memory: 'User prefers coffee over tea'
 });
 ```
+
+**Tool Output:**
+- On success: Returns `"Memory added"`
+- On error: Throws an error if the `memory` parameter is missing
 
 ## Best Practices
 

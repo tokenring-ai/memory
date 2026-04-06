@@ -15,6 +15,7 @@ const packageConfigSchema = z.object({});
 
 export default {
   name: packageJSON.name,
+  displayName: "Agent Memory",
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
