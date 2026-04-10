@@ -1,4 +1,4 @@
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
 
@@ -9,17 +9,25 @@ const inputSchema = {
       description: "Index of memory item to update",
       required: true,
       minimum: 0,
-    }
+    },
   },
-  remainder: {name: "text", description: "New text for the memory item", required: true},
+  remainder: {
+    name: "text",
+    description: "New text for the memory item",
+    required: true,
+  },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({remainder, args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+function execute({
+                   remainder,
+                   args,
+                   agent,
+                 }: AgentCommandInputType<typeof inputSchema>): string {
   const index = args["--index"];
 
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
   memoryService.spliceMemory(index, 1, agent, remainder);
-  return `Updated memory item at index ${index}\n${await _listMemories(memoryService, agent)}`;
+  return `Updated memory item at index ${index}\n${_listMemories(agent)}`;
 }
 
 export default {
@@ -31,5 +39,7 @@ export default {
 
 ## Example
 
-/memory set 0 Updated meeting notes`
+          / memory
+  set
+  0 Updated meeting notes`,
 } satisfies TokenRingAgentCommand<typeof inputSchema>;

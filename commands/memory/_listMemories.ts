@@ -1,12 +1,13 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
+import type Agent from "@tokenring-ai/agent/Agent";
 import {MemoryState} from "../../state/memoryState.ts";
 
-export default async function _listMemories(memoryService: ShortTermMemoryService, agent: Agent): Promise<string> {
+export default function _listMemories(
+  agent: Agent,
+) {
   let index = 0;
   const lines: string[] = [];
 
-  for await (const memory of agent.getState(MemoryState).memories) {
+  for (const memory of agent.getState(MemoryState).memories) {
     if (index === 0) lines.push("Memory items:");
     const memoryLines = memory.split("\n");
     lines.push(`[${index}] ${memoryLines[0]}`);

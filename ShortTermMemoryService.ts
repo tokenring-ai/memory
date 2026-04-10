@@ -1,5 +1,5 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import {MemoryState} from "./state/memoryState.ts";
 
 export default class ShortTermMemoryService implements TokenRingService {
