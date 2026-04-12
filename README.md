@@ -33,10 +33,12 @@ const service = new ShortTermMemoryService();
 ```
 
 **Properties:**
+
 - `name: string = "ShortTermMemoryService"` — Service identifier
 - `description: string = "Provides Short Term Memory functionality"` — Service description
 
 **Methods:**
+
 - `attach(agent: Agent): void` — Initializes the `MemoryState` on agent attachment
 - `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state
 - `clearMemory(agent: Agent): void` — Clears all memories from the agent's state
@@ -53,32 +55,34 @@ const state = new MemoryState({ memories: [] });
 ```
 
 **Properties:**
+
 - `name: string = "MemoryState"` — State slice name
 - `serializationSchema` — Zod schema for state serialization
 - `memories: string[]` — Array of memory strings
 
 **Methods:**
+
 - `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial memories
 - `reset(): void` — Clears memories when state is reset
 - `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent by serializing/deserializing
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
 - `deserialize(data: z.output<typeof serializationSchema>): void` — Deserializes memories from stored data
-- `show(): string[]` — Returns formatted string array representation of memories with 1-based indexing (e.g., `["Memories: 2", "  [1] First memory", "  [2] Second memory"]`)
+- `show(): string` — Returns formatted string representation of memories with 1-based indexing
 
 ### Context Handler
 
 The `short-term-memory` context handler automatically injects memories into agent context:
 
 ```typescript
-import {type ContextHandlerOptions, ContextItem} from "@tokenring-ai/chat/schema";
+import type {ContextHandlerOptions, ContextItem} from "@tokenring-ai/chat/schema";
 import {MemoryState} from "@tokenring-ai/memory/state/memoryState";
 
-export default async function* getContextItems(
+export default function* getContextItems(
   {agent}: ContextHandlerOptions
-): AsyncGenerator<ContextItem>
+): Generator<ContextItem>
 ```
 
-This yields memories as `ContextItem` objects with role "user" and memory content, making them available to the agent in all future interactions.
+This yields memories as `ContextItem` objects with role "user" and the memory content, making them available to the agent in all future interactions.
 
 ## Usage Examples
 
@@ -208,6 +212,7 @@ app.installPlugin(memoryPlugin);
 ```
 
 **Automatic Registration:**
+
 - `ShortTermMemoryService` added to application services
 - `memory_add` tool registered with `ChatService`
 - `memory` commands registered with `AgentCommandService`
@@ -287,11 +292,13 @@ The package provides the following slash-prefixed commands:
 Display all stored memory items.
 
 **Example:**
+
 ```bash
 /memory list
 ```
 
 **Output Format:**
+
 ```
 Memory items:
 [0] First memory item
@@ -299,6 +306,7 @@ Memory items:
 ```
 
 If no memories are stored:
+
 ```
 Memory items:
 No memory items stored
@@ -309,11 +317,13 @@ No memory items stored
 Add a new memory item. The text after the command is captured as a remainder parameter.
 
 **Example:**
+
 ```bash
 /memory add Remember to buy groceries tomorrow
 ```
 
 **Output:**
+
 ```
 Added new memory: Remember to buy groceries tomorrow
 Memory items:
@@ -325,11 +335,13 @@ Memory items:
 Remove all memory items.
 
 **Example:**
+
 ```bash
 /memory clear
 ```
 
 **Output:**
+
 ```
 Cleared all memory items
 ```
@@ -339,15 +351,25 @@ Cleared all memory items
 Remove memory item at specific index using the `--index` flag.
 
 **Example:**
+
 ```bash
 /memory remove --index 0
 ```
 
 **Output:**
+
 ```
 Removed memory item at index 0
 Memory items:
 [0] Remaining memory item
+```
+
+If no memories exist:
+
+```
+Removed memory item at index 0
+Memory items:
+No memory items stored
 ```
 
 #### `/memory set`
@@ -355,15 +377,25 @@ Memory items:
 Update memory item at specific index using the `--index` flag. The text after the flags is captured as a remainder parameter.
 
 **Example:**
+
 ```bash
 /memory set --index 0 Updated meeting notes
 ```
 
 **Output:**
+
 ```
 Updated memory item at index 0
 Memory items:
 [0] Updated meeting notes
+```
+
+If no memories exist after update:
+
+```
+Updated memory item at index 0
+Memory items:
+No memory items stored
 ```
 
 ## Tools
@@ -384,7 +416,8 @@ await agent.executeTool('memory_add', {
 ```
 
 **Tool Output:**
-- On success: Returns `"Memory added"`
+
+- On success: Returns `"Memory added"` and logs an info message
 - On error: Throws an error if the `memory` parameter is missing
 
 ## Best Practices
