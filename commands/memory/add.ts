@@ -11,13 +11,13 @@ const inputSchema = {
   },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({
+function execute({
                          remainder,
                          agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+                       }: AgentCommandInputType<typeof inputSchema>) {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
   memoryService.addMemory(remainder, agent);
-  return `Added new memory: ${remainder}\n${await _listMemories(agent)}`;
+  return `Added new memory: ${remainder}\n${_listMemories(agent)}`;
 }
 
 export default {
