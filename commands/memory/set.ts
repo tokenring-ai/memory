@@ -4,7 +4,7 @@ import _listMemories from "./_listMemories.ts";
 
 const inputSchema = {
   args: {
-    "--index": {
+    "index": {
       type: "number",
       description: "Index of memory item to update",
       required: true,
@@ -23,7 +23,7 @@ function execute({
                    args,
                    agent,
                  }: AgentCommandInputType<typeof inputSchema>): string {
-  const index = args["--index"];
+  const index = args.index;
 
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
   memoryService.spliceMemory(index, 1, agent, remainder);
