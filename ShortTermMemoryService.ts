@@ -1,6 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingService} from "@tokenring-ai/app/types";
-import {MemoryState} from "./state/memoryState.ts";
+import type { TokenRingService } from "@tokenring-ai/app/types";
+import { MemoryState } from "./state/memoryState.ts";
 
 export default class ShortTermMemoryService implements TokenRingService {
   readonly name = "ShortTermMemoryService";
@@ -22,12 +22,7 @@ export default class ShortTermMemoryService implements TokenRingService {
     });
   }
 
-  spliceMemory(
-    index: number,
-    count: number,
-    agent: Agent,
-    ...items: string[]
-  ): void {
+  spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void {
     agent.mutateState(MemoryState, (state: MemoryState) => {
       state.memories.splice(index, count, ...items);
     });

@@ -1,7 +1,7 @@
-import type {Agent} from "@tokenring-ai/agent";
-import {AgentStateSlice} from "@tokenring-ai/agent/types";
+import type { Agent } from "@tokenring-ai/agent";
+import { AgentStateSlice } from "@tokenring-ai/agent/types";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
-import {z} from "zod";
+import { z } from "zod";
 
 const serializationSchema = z.object({
   memories: z.array(z.string()),
@@ -10,7 +10,7 @@ const serializationSchema = z.object({
 export class MemoryState extends AgentStateSlice<typeof serializationSchema> {
   memories: string[] = [];
 
-  constructor({memories = []}: { memories?: string[] } = {}) {
+  constructor({ memories = [] }: { memories?: string[] } = {}) {
     super("MemoryState", serializationSchema);
     this.memories = [...memories];
   }

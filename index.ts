@@ -1,1 +1,1 @@
-export {default as ShortTermMemoryService} from "./ShortTermMemoryService.ts";
+export { default as ShortTermMemoryService } from "./ShortTermMemoryService.ts";

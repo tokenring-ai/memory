@@ -1,6 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, } from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
 /**
@@ -9,10 +9,7 @@ import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 const name = "memory_add";
 const displayName = "Memory/addMemory";
 
-function execute(
-  {memory}: z.output<typeof inputSchema>,
-  agent: Agent,
-): string {
+function execute({ memory }: z.output<typeof inputSchema>, agent: Agent): string {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   if (!memory) {
@@ -25,8 +22,7 @@ function execute(
   return "Memory added";
 }
 
-const description =
-  "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.";
+const description = "Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind.";
 
 const inputSchema = z.object({
   memory: z.string().describe("The fact, idea, or info to remember."),

@@ -1,4 +1,4 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import ShortTermMemoryService from "../../ShortTermMemoryService.ts";
 import _listMemories from "./_listMemories.ts";
 
@@ -11,10 +11,7 @@ const inputSchema = {
   },
 } as const satisfies AgentCommandInputSchema;
 
-function execute({
-                         remainder,
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>) {
+function execute({ remainder, agent }: AgentCommandInputType<typeof inputSchema>) {
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
   memoryService.addMemory(remainder, agent);
   return `Added new memory: ${remainder}\n${_listMemories(agent)}`;

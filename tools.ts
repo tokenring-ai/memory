@@ -1,5 +1,3 @@
 import addMemory from "./tools/addMemory.ts";
 
-export default [
-  addMemory,
-];
+export default [addMemory];

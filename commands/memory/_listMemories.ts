@@ -1,9 +1,7 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import {MemoryState} from "../../state/memoryState.ts";
+import { MemoryState } from "../../state/memoryState.ts";
 
-export default function _listMemories(
-  agent: Agent,
-) {
+export default function _listMemories(agent: Agent) {
   let index = 0;
   const lines: string[] = [];
 
