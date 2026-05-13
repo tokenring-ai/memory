@@ -2,7 +2,10 @@
 
 ## Overview
 
-The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework. It enables agents to store and recall simple facts or information during a session, maintaining context across interactions. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system via tools, chat commands, context handlers, and scripting functions.
+The `@tokenring-ai/memory` package provides short-term memory management for AI agents within the TokenRing framework.
+It enables agents to store and recall simple facts or information during a session, maintaining context across
+interactions. This package uses an agent state slice for memory storage and integrates with the TokenRing agent system
+via tools, chat commands, context handlers, and scripting functions.
 
 ## Installation
 
@@ -13,7 +16,8 @@ bun add @tokenring-ai/memory
 ## Features
 
 - **Memory Storage**: Store and retrieve memories as strings in an ordered list
-- **Context Integration**: Memories are automatically injected into agent context for all future interactions via context handlers
+- **Context Integration**: Memories are automatically injected into agent context for all future interactions via
+  context handlers
 - **State Management**: Built-in state serialization/deserialization for persistence
 - **Sub-agent Persistence**: Memories can be transferred from parent agents to sub-agents
 - **Multiple Interfaces**: Tools and chat commands for programmatic and interactive management
@@ -42,7 +46,8 @@ const service = new ShortTermMemoryService();
 - `attach(agent: Agent): void` — Initializes the `MemoryState` on agent attachment
 - `addMemory(memory: string, agent: Agent): void` — Adds a memory string to the agent's memory state
 - `clearMemory(agent: Agent): void` — Clears all memories from the agent's state
-- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (remove/replace/insert)
+- `spliceMemory(index: number, count: number, agent: Agent, ...items: string[]): void` — Modifies the memory array (
+  remove/replace/insert)
 
 ### MemoryState
 
@@ -62,7 +67,8 @@ const state = new MemoryState({ memories: [] });
 
 **Methods:**
 
-- `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial memories
+- `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial
+  memories
 - `reset(): void` — Clears memories when state is reset
 - `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent by serializing/deserializing
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
@@ -82,7 +88,8 @@ export default function* getContextItems(
 ): Generator<ContextItem>
 ```
 
-This yields memories as `ContextItem` objects with role "user" and the memory content, making them available to the agent in all future interactions.
+This yields memories as `ContextItem` objects with role "user" and the memory content, making them available to the
+agent in all future interactions.
 
 ## Usage Examples
 
@@ -183,21 +190,21 @@ const packageConfigSchema = z.object({});
 
 ## Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `@tokenring-ai/app` | 0.2.0 | Base application framework |
-| `@tokenring-ai/chat` | 0.2.0 | Chat service and tool definitions |
-| `@tokenring-ai/agent` | 0.2.0 | Agent framework and state management |
-| `@tokenring-ai/utility` | 0.2.0 | Shared utilities and helpers |
-| `@tokenring-ai/scripting` | 0.2.0 | Scripting service for global functions |
-| `zod` | ^4.3.6 | Schema validation and serialization |
+| Package                   | Version | Purpose                                |
+|---------------------------|---------|----------------------------------------|
+| `@tokenring-ai/app`       | 0.2.0   | Base application framework             |
+| `@tokenring-ai/chat`      | 0.2.0   | Chat service and tool definitions      |
+| `@tokenring-ai/agent`     | 0.2.0   | Agent framework and state management   |
+| `@tokenring-ai/utility`   | 0.2.0   | Shared utilities and helpers           |
+| `@tokenring-ai/scripting` | 0.2.0   | Scripting service for global functions |
+| `zod`                     | ^4.3.6  | Schema validation and serialization    |
 
 ### Dev Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `vitest` | ^4.1.1 | Testing framework |
-| `typescript` | ^6.0.2 | TypeScript compiler |
+| Package      | Version | Purpose             |
+|--------------|---------|---------------------|
+| `vitest`     | ^4.1.1  | Testing framework   |
+| `typescript` | ^6.0.2  | TypeScript compiler |
 
 ## Integration
 
@@ -277,13 +284,13 @@ subState.transferStateFromParent(parentAgent);
 
 The package provides the following slash-prefixed commands:
 
-| Command | Description | Parameters | Example |
-|---------|-------------|------------|---------|
-| `/memory list` | Display all stored memory items | None | `/memory list` |
-| `/memory add` | Add a new memory item | `text` (remainder) | `/memory add Remember to review the report` |
-| `/memory clear` | Remove all memory items | None | `/memory clear` |
-| `/memory remove` | Remove memory item at index | `--index` (number) | `/memory remove --index 0` |
-| `/memory set` | Update memory item at index | `--index` (number), `text` (remainder) | `/memory set --index 0 Updated notes` |
+| Command          | Description                     | Parameters                             | Example                                     |
+|------------------|---------------------------------|----------------------------------------|---------------------------------------------|
+| `/memory list`   | Display all stored memory items | None                                   | `/memory list`                              |
+| `/memory add`    | Add a new memory item           | `text` (remainder)                     | `/memory add Remember to review the report` |
+| `/memory clear`  | Remove all memory items         | None                                   | `/memory clear`                             |
+| `/memory remove` | Remove memory item at index     | `--index` (number)                     | `/memory remove --index 0`                  |
+| `/memory set`    | Update memory item at index     | `--index` (number), `text` (remainder) | `/memory set --index 0 Updated notes`       |
 
 ### Command Details
 
@@ -374,7 +381,8 @@ No memory items stored
 
 #### `/memory set`
 
-Update memory item at specific index using the `--index` flag. The text after the flags is captured as a remainder parameter.
+Update memory item at specific index using the `--index` flag. The text after the flags is captured as a remainder
+parameter.
 
 **Example:**
 
@@ -402,8 +410,8 @@ No memory items stored
 
 The package provides the following tool for agent interaction:
 
-| Tool | Display Name | Description | Parameters |
-|------|--------------|-------------|------------|
+| Tool         | Display Name     | Description                                                                                                                             | Parameters                                             |
+|--------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
 | `memory_add` | Memory/addMemory | Add an item to the memory list. The item will be presented in future chats to help keep important information in the back of your mind. | `memory: string` - The fact, idea, or info to remember |
 
 ### Tool Usage
@@ -425,7 +433,8 @@ await agent.executeTool('memory_add', {
 1. **Use Descriptive Memories**: Store clear, concise facts that will be useful in future interactions
 2. **Regular Cleanup**: Use `/memory clear` or `/memory remove` to maintain relevant memories
 3. **Context Awareness**: Remember that memories are injected into every agent interaction via context handlers
-4. **Session Scope**: Be aware that memories are session-scoped and will be lost on state reset unless explicitly persisted
+4. **Session Scope**: Be aware that memories are session-scoped and will be lost on state reset unless explicitly
+   persisted
 5. **Sub-agent Transfer**: Use `transferStateFromParent` when creating sub-agents that need context
 
 ## Testing and Development
