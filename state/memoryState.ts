@@ -1,5 +1,6 @@
 import type { Agent } from "@tokenring-ai/agent";
 import { AgentStateSlice } from "@tokenring-ai/agent/types";
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
 import { z } from "zod";
 
@@ -12,7 +13,7 @@ export class MemoryState extends AgentStateSlice<typeof serializationSchema> {
 
   constructor({ memories = [] }: { memories?: string[] } = {}) {
     super("MemoryState", serializationSchema);
-    this.memories = [...memories];
+    this.memories = deepClone(memories);
   }
 
   reset(): void {
@@ -21,7 +22,7 @@ export class MemoryState extends AgentStateSlice<typeof serializationSchema> {
 
   transferStateFromParent(parent: Agent): void {
     const parentState = parent.getState(MemoryState);
-    this.deserialize(parentState.serialize());
+    this.memories = [...parentState.memories];
   }
 
   serialize(): z.output<typeof serializationSchema> {
