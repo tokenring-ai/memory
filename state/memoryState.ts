@@ -32,7 +32,7 @@ export class MemoryState extends AgentStateSlice<typeof serializationSchema> {
   }
 
   deserialize(data: z.output<typeof serializationSchema>): void {
-    this.memories = data.memories ? [...data.memories] : [];
+    this.memories = data.memories;
   }
 
   show(): string {

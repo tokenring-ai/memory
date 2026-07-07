@@ -6,7 +6,7 @@ import { MemoryState } from "../state/memoryState.ts";
  */
 export default function* getContextItems({ agent }: ContextHandlerOptions): Generator<ContextItem> {
   const state = agent.getState(MemoryState);
-  for (const memory of state.memories ?? []) {
+  for (const memory of state.memories) {
     yield {
       role: "user",
       content: memory,

@@ -1,5 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { TokenRingToolDefinition } from "@tokenring-ai/chat/schema";
+import { ToolCallError } from "@tokenring-ai/chat/util/tokenRingTool";
 import { z } from "zod";
 import ShortTermMemoryService from "../ShortTermMemoryService.ts";
 
@@ -13,7 +14,7 @@ function execute({ memory }: z.output<typeof inputSchema>, agent: Agent): string
   const memoryService = agent.requireServiceByType(ShortTermMemoryService);
 
   if (!memory) {
-    throw new Error(`[${name}] Missing parameter: memory`);
+    throw new ToolCallError(name, `Missing parameter: memory`);
   }
 
   memoryService.addMemory(memory, agent);
