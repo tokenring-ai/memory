@@ -32,6 +32,8 @@ The primary service class implementing memory management for agents.
 
 ```typescript
 import ShortTermMemoryService from "@tokenring-ai/memory/ShortTermMemoryService";
+// or
+import { ShortTermMemoryService } from "@tokenring-ai/memory";
 
 const service = new ShortTermMemoryService();
 ```
@@ -70,22 +72,30 @@ const state = new MemoryState({ memories: [] });
 - `constructor({memories = []}: { memories?: string[] } = {})` — Creates a new memory state with optional initial
   memories
 - `reset(): void` — Clears memories when state is reset
-- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent by serializing/deserializing
+- `transferStateFromParent(parent: Agent): void` — Transfers state from parent agent by copying memories
 - `serialize(): z.output<typeof serializationSchema>` — Serializes memories for persistence
 - `deserialize(data: z.output<typeof serializationSchema>): void` — Deserializes memories from stored data
-- `show(): string` — Returns formatted string representation of memories with 1-based indexing
+- `show(): string` — Returns formatted string representation of memories with 1-based indexing (for display purposes)
 
 ### Context Handler
 
 The `short-term-memory` context handler automatically injects memories into agent context:
 
 ```typescript
-import type {ContextHandlerOptions, ContextItem} from "@tokenring-ai/chat/schema";
-import {MemoryState} from "@tokenring-ai/memory/state/memoryState";
+import type { ContextHandlerOptions, ContextItem } from "@tokenring-ai/chat/schema";
+import { MemoryState } from "@tokenring-ai/memory/state/memoryState";
 
 export default function* getContextItems(
-  {agent}: ContextHandlerOptions
-): Generator<ContextItem>
+  { agent }: ContextHandlerOptions
+): Generator<ContextItem> {
+  const state = agent.getState(MemoryState);
+  for (const memory of state.memories) {
+    yield {
+      role: "user",
+      content: memory,
+    };
+  }
+}
 ```
 
 This yields memories as `ContextItem` objects with role "user" and the memory content, making them available to the
@@ -123,11 +133,11 @@ const result = await agent.executeCommand('/memory list');
 console.log(result);
 // Output: "Memory items:\n[0] Remember to review the report"
 
-// Remove a memory by index (using --index flag)
-await agent.executeCommand('/memory remove --index 0');
+// Remove a memory by index (using positional argument)
+await agent.executeCommand('/memory remove 0');
 
-// Update a memory (using --index flag, text as remainder)
-await agent.executeCommand('/memory set --index 0 Updated meeting notes');
+// Update a memory (using positional argument for index, text as remainder)
+await agent.executeCommand('/memory set 0 Updated meeting notes');
 
 // Clear all memories
 await agent.executeCommand('/memory clear');
@@ -165,7 +175,7 @@ const restoredState = new MemoryState();
 restoredState.deserialize(serializedData);
 ```
 
-### Sub-agent Integration
+### Sub-agent Integration in Usage
 
 ```typescript
 // Memories can be transferred to sub-agents
@@ -190,21 +200,21 @@ const packageConfigSchema = z.object({});
 
 ## Dependencies
 
-| Package                   | Version | Purpose                                |
-|---------------------------|---------|----------------------------------------|
-| `@tokenring-ai/app`       | 0.2.0   | Base application framework             |
-| `@tokenring-ai/chat`      | 0.2.0   | Chat service and tool definitions      |
-| `@tokenring-ai/agent`     | 0.2.0   | Agent framework and state management   |
-| `@tokenring-ai/utility`   | 0.2.0   | Shared utilities and helpers           |
-| `@tokenring-ai/scripting` | 0.2.0   | Scripting service for global functions |
-| `zod`                     | ^4.3.6  | Schema validation and serialization    |
+| Package                   | Version    | Purpose                                |
+|---------------------------|------------|----------------------------------------|
+| `@tokenring-ai/app`       | workspace:* | Base application framework             |
+| `@tokenring-ai/chat`      | workspace:* | Chat service and tool definitions      |
+| `@tokenring-ai/agent`     | workspace:* | Agent framework and state management   |
+| `@tokenring-ai/utility`   | workspace:* | Shared utilities and helpers           |
+| `@tokenring-ai/scripting` | workspace:* | Scripting service for global functions |
+| `zod`                     | ^4.4.3     | Schema validation and serialization    |
 
 ### Dev Dependencies
 
-| Package      | Version | Purpose             |
-|--------------|---------|---------------------|
-| `vitest`     | ^4.1.1  | Testing framework   |
-| `typescript` | ^6.0.2  | TypeScript compiler |
+| Package      | Version    | Purpose             |
+|--------------|------------|---------------------|
+| `vitest`     | ^4.1.1     | Testing framework   |
+| `typescript` | ^6.0.2     | TypeScript compiler |
 
 ## Integration
 
@@ -289,8 +299,8 @@ The package provides the following slash-prefixed commands:
 | `/memory list`   | Display all stored memory items | None                                   | `/memory list`                              |
 | `/memory add`    | Add a new memory item           | `text` (remainder)                     | `/memory add Remember to review the report` |
 | `/memory clear`  | Remove all memory items         | None                                   | `/memory clear`                             |
-| `/memory remove` | Remove memory item at index     | `--index` (number)                     | `/memory remove --index 0`                  |
-| `/memory set`    | Update memory item at index     | `--index` (number), `text` (remainder) | `/memory set --index 0 Updated notes`       |
+| `/memory remove` | Remove memory item at index     | `index` (number, positional)           | `/memory remove 0`                          |
+| `/memory set`    | Update memory item at index     | `index` (number), `text` (remainder)   | `/memory set 0 Updated notes`               |
 
 ### Command Details
 
@@ -306,7 +316,7 @@ Display all stored memory items.
 
 **Output Format:**
 
-```
+```text
 Memory items:
 [0] First memory item
 [1] Second memory item
@@ -314,7 +324,7 @@ Memory items:
 
 If no memories are stored:
 
-```
+```text
 Memory items:
 No memory items stored
 ```
@@ -331,11 +341,13 @@ Add a new memory item. The text after the command is captured as a remainder par
 
 **Output:**
 
-```
+```text
 Added new memory: Remember to buy groceries tomorrow
 Memory items:
 [0] Remember to buy groceries tomorrow
 ```
+
+Note: The output format uses 0-based indexing for memory items.
 
 #### `/memory clear`
 
@@ -349,31 +361,31 @@ Remove all memory items.
 
 **Output:**
 
-```
+```text
 Cleared all memory items
 ```
 
 #### `/memory remove`
 
-Remove memory item at specific index using the `--index` flag.
+Remove memory item at specific index using a positional argument.
 
 **Example:**
 
 ```bash
-/memory remove --index 0
+/memory remove 0
 ```
 
 **Output:**
 
-```
+```text
 Removed memory item at index 0
 Memory items:
 [0] Remaining memory item
 ```
 
-If no memories exist:
+If no memories exist or after removal leaves no items:
 
-```
+```text
 Removed memory item at index 0
 Memory items:
 No memory items stored
@@ -381,30 +393,23 @@ No memory items stored
 
 #### `/memory set`
 
-Update memory item at specific index using the `--index` flag. The text after the flags is captured as a remainder
-parameter.
+Update memory item at specific index using a positional argument for the index. The text after the index is captured as a remainder parameter.
 
 **Example:**
 
 ```bash
-/memory set --index 0 Updated meeting notes
+/memory set 0 Updated meeting notes
 ```
 
 **Output:**
 
-```
+```text
 Updated memory item at index 0
 Memory items:
 [0] Updated meeting notes
 ```
 
-If no memories exist after update:
-
-```
-Updated memory item at index 0
-Memory items:
-No memory items stored
-```
+If the index is invalid or after update leaves no items, the command will still show the memory list (which may be empty or unchanged).
 
 ## Tools
 
@@ -454,7 +459,7 @@ bun test:coverage
 
 ### Package Structure
 
-```
+```text
 pkg/memory/
 ├── index.ts                              # Main entry point, exports ShortTermMemoryService
 ├── ShortTermMemoryService.ts             # Service implementation providing memory management
@@ -465,7 +470,6 @@ pkg/memory/
 ├── tools/
 │   └── addMemory.ts                      # Tool to add a memory item to the agent's memory state
 ├── commands/
-│   ├── memory.ts                         # /memory command index
 │   └── memory/
 │       ├── list.ts                       # /memory list
 │       ├── add.ts                        # /memory add
@@ -474,7 +478,7 @@ pkg/memory/
 │       ├── set.ts                        # /memory set
 │       └── _listMemories.ts              # Shared list helper
 ├── tools.ts                              # Exports agent tools
-├── commands.ts                           # Exports chat commands
+├── commands.ts                           # Exports chat commands (array of memory sub-commands)
 ├── contextHandlers.ts                    # Exports context handlers
 ├── plugin.ts                             # Plugin for automatic service registration
 ├── package.json                          # Package metadata and dependencies
