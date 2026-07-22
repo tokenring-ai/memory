@@ -213,7 +213,7 @@ const packageConfigSchema = z.object({});
 
 | Package      | Version    | Purpose             |
 |--------------|------------|---------------------|
-| `vitest`     | ^4.1.1     | Testing framework   |
+| `bun test`     | builtin  | Testing framework   |
 | `typescript` | ^6.0.2     | TypeScript compiler |
 
 ## Integration
@@ -482,7 +482,6 @@ pkg/memory/
 ├── contextHandlers.ts                    # Exports context handlers
 ├── plugin.ts                             # Plugin for automatic service registration
 ├── package.json                          # Package metadata and dependencies
-├── vitest.config.ts                      # Vitest configuration
 └── README.md                             # This documentation
 ```
 
